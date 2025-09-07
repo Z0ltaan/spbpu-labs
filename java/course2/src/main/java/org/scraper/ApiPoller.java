@@ -1,12 +1,11 @@
 package org.scraper;
 
+import java.io.IOException;
+import java.util.concurrent.Semaphore;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
-
-import java.io.IOException;
-import java.util.concurrent.Semaphore;
 
 public class ApiPoller implements Runnable {
   private final ApiServiceModel service_;
@@ -26,29 +25,42 @@ public class ApiPoller implements Runnable {
   public void run() {
     try {
       semaphore.acquire();
-      pollService();
-    } catch (InterruptedException e) {
-      System.err.println("Error polling service " + service_.getUrl() + ": " + e.getMessage());
+      ResponseInfoModel info = pollService();
+      if (info.getResponseCode() != 200) {
+        throw new IOException(
+            "Error polling "
+                + service_.getUrl()
+                + ": HTTP "
+                + info.getResponseCode());
+      }
+      writeData(info);
+    } catch (InterruptedException | IOException e) {
+      System.err.println(e.getMessage());
     } finally {
       semaphore.release();
     }
   }
 
-  private void pollService(){
+  private ResponseInfoModel pollService() throws IOException {
+    var dataWrapper = new Object() {
+      String responseData = "";
+      int responseCode = 0;
+    };
+
     try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
-      client.execute(new HttpGet(service_.getUrl()),
-              response -> {
-                if (response.getStatusLine().getStatusCode() == 200) {
-                  dataWriter.writeData(service_.getUrl(), EntityUtils.toString(response.getEntity()));
-                } else {
-                  System.err.println("Error polling " + service_.getUrl() +
-                          ": HTTP " + response.getStatusLine().getStatusCode());
-                }
-                return null;
-              }
-      );
-    } catch (IOException e) {
-      System.err.println("Error polling " + service_.getUrl() + ": " + e.getMessage());
+      client.execute(
+          new HttpGet(service_.getUrl()),
+          response -> {
+            dataWrapper.responseCode = response.getStatusLine().getStatusCode();
+            dataWrapper.responseData = EntityUtils.toString(response.getEntity());
+            return null;
+          });
     }
+
+    return new ResponseInfoModel(dataWrapper.responseData, dataWrapper.responseCode);
+  }
+
+  private void writeData(ResponseInfoModel info) {
+    dataWriter.writeData(service_.getUrl(), info.getResponseEntity());
   }
 }

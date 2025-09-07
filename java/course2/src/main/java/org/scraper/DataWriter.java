@@ -5,7 +5,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.concurrent.locks.ReentrantLock;
 
-public class DataWriter {
+public class DataWriter implements AutoCloseable {
   private final String format;
   private final ReentrantLock lock;
   private FileWriter fileWriter;
@@ -21,26 +21,13 @@ public class DataWriter {
   }
 
   private void initializeFile() throws IOException {
-      String fileName = "api_data." + format;
-      fileWriter = new FileWriter(fileName, false);
-      if (format.equals("csv")) {
-        fileWriter.write("timestamp;service;data\n");
-      } else if (format.equals("json")) {
-        fileWriter.write("[\n");
-      }
-//      } else if (format.equals("json")) {
-//        // Если файл уже существует, читаем его и проверяем структуру
-//        String content = Files.readString(path).trim();
-//        if (content.endsWith("]")) {
-//          // Удаляем закрывающую скобку для добавления новых данных
-//          content = content.substring(0, content.length() - 1);
-//          if (!content.endsWith("[\n") && !content.endsWith("[")) {
-//            content += ",";
-//          }
-//          Files.writeString(path, content);
-//          isFirstEntry = false;
-//        }
-//      }
+    String fileName = "api_data." + format;
+    fileWriter = new FileWriter(fileName, false);
+    if (format.equals("csv")) {
+      fileWriter.write("timestamp;service;data\n");
+    } else if (format.equals("json")) {
+      fileWriter.write("[\n");
+    }
   }
 
   public void writeData(String serviceName, String data) {
@@ -50,10 +37,10 @@ public class DataWriter {
       String formattedData;
 
       if (format.equals("csv")) {
-        formattedData = timestamp + ";" + serviceName + ";" + data;
+        formattedData = timestamp + ";" + serviceName + ";" + data + "\n";
       } else {
         String jsonEntry = "{\"timestamp\":\"" + timestamp + "\",\"service\":\""
-                + serviceName + "\",\"data\":" + data + "}" ;
+            + serviceName + "\",\"data\":" + data + "}";
 
         if (isFirstEntry) {
           formattedData = jsonEntry + "\n";

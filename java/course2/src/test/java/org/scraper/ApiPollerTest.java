@@ -1,15 +1,15 @@
 package org.scraper;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.*;
+
+import java.util.concurrent.Semaphore;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import java.util.concurrent.Semaphore;
-
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ApiPollerTest {
@@ -24,12 +24,17 @@ class ApiPollerTest {
 
   @Test
   public void testConstructor() {
-    assertThrows(NullPointerException.class, () -> new ApiPoller(mockService, mockDataWriter, null));
-    assertThrows(NullPointerException.class, () -> new ApiPoller(null, mockDataWriter, mockSemaphore));
+    assertThrows(
+        NullPointerException.class, () -> new ApiPoller(mockService, mockDataWriter, null));
+    assertThrows(
+        NullPointerException.class, () -> new ApiPoller(null, mockDataWriter, mockSemaphore));
     assertThrows(NullPointerException.class, () -> new ApiPoller(mockService, null, mockSemaphore));
     ApiPoller apiPoller = null;
     apiPoller = new ApiPoller(mockService, mockDataWriter, mockSemaphore);
     assertNotNull(apiPoller);
+    ApiPoller apiPollerWithCustomClient = null;
+    apiPollerWithCustomClient = new ApiPoller(mockService, mockDataWriter, mockSemaphore);
+    assertNotNull(apiPollerWithCustomClient);
   }
 
   @Test
@@ -38,12 +43,9 @@ class ApiPollerTest {
     doNothing().when(mockDataWriter).writeData(anyString(), anyString());
     doNothing().when(mockSemaphore).acquire();
     doNothing().when(mockSemaphore).release();
-    ApiPoller apiPoller = new ApiPoller(mockService, mockDataWriter, mockSemaphore);
-    Thread thread = new Thread(apiPoller);
-    thread.start();
-    Thread.sleep(2000);
-    thread.interrupt();
-    thread.join();
+    ApiPoller apiPoller = new ApiPoller(mockService, mockDataWriter,
+        mockSemaphore);
+    apiPoller.run();
     verify(mockService, atLeastOnce()).getUrl();
     verify(mockDataWriter, atLeastOnce()).writeData(anyString(), anyString());
   }
