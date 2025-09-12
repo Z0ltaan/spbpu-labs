@@ -9,8 +9,8 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class DataWriterTest {
   private final String csvFileName = "api_data.csv";
@@ -21,24 +21,8 @@ public class DataWriterTest {
     assertThrows(IllegalArgumentException.class, () -> new DataWriter(null));
     assertThrows(IllegalArgumentException.class, () -> new DataWriter(""));
     assertThrows(IllegalArgumentException.class, () -> new DataWriter("wrongformat"));
-    DataWriter tmp1 = null;
-    DataWriter tmp2 = null;
-    try {
-     tmp1 = new DataWriter("json");
-     tmp2 = new DataWriter("csv");
-    } catch (IOException e) {
-      e.printStackTrace();
-      System.err.println(e.getMessage());
-    } finally {
-      if (tmp1 != null) {
-        tmp1.close();
-      }
-      if (tmp2 != null) {
-        tmp2.close();
-      }
-    }
-    assertNotNull(tmp1);
-    assertNotNull(tmp2);
+    assertDoesNotThrow(() -> new DataWriter("json"));
+    assertDoesNotThrow(() -> new DataWriter("csv"));
   }
 
   @AfterEach

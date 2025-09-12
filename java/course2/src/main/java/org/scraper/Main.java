@@ -1,7 +1,10 @@
 package org.scraper;
 
 import java.io.IOException;
-import java.util.concurrent.*;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.ScheduledThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public class Main {
   public static void main(String[] args) {

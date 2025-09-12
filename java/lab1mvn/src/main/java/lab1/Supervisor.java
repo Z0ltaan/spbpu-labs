@@ -13,7 +13,6 @@ public class Supervisor implements Runnable {
 
   @Override
   public void run() {
-
     synchronized (this.program) {
       this.startAbstractProgram();
 
@@ -27,7 +26,8 @@ public class Supervisor implements Runnable {
           }
           program.notify();
         }
-      } catch (InterruptedException e) {}
+      } catch (InterruptedException e) {
+      }
 
       this.stopAbstractProgram();
     }

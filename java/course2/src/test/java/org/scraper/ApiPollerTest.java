@@ -1,15 +1,20 @@
 package org.scraper;
 
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.anyString;
 
 import java.util.concurrent.Semaphore;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 @ExtendWith(MockitoExtension.class)
 class ApiPollerTest {
@@ -29,12 +34,7 @@ class ApiPollerTest {
     assertThrows(
         NullPointerException.class, () -> new ApiPoller(null, mockDataWriter, mockSemaphore));
     assertThrows(NullPointerException.class, () -> new ApiPoller(mockService, null, mockSemaphore));
-    ApiPoller apiPoller = null;
-    apiPoller = new ApiPoller(mockService, mockDataWriter, mockSemaphore);
-    assertNotNull(apiPoller);
-    ApiPoller apiPollerWithCustomClient = null;
-    apiPollerWithCustomClient = new ApiPoller(mockService, mockDataWriter, mockSemaphore);
-    assertNotNull(apiPollerWithCustomClient);
+    assertDoesNotThrow(() -> new ApiPoller(mockService, mockDataWriter, mockSemaphore));
   }
 
   @Test

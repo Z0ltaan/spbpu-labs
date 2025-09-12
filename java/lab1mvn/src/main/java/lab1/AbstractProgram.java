@@ -3,7 +3,7 @@ package lab1;
 import java.util.Random;
 
 public class AbstractProgram implements Runnable {
-  public volatile State state;
+  public State state;
   private final Random randomStateProducer;
 
   public AbstractProgram() {
@@ -11,20 +11,20 @@ public class AbstractProgram implements Runnable {
     this.randomStateProducer = new Random();
   }
 
-  public boolean hasErrors() {
+  public synchronized boolean hasErrors() {
     return this.getState() == State.FATAL_ERROR;
   }
 
-  public boolean hasStopped() {
+  public synchronized boolean hasStopped() {
     return this.getState() == State.STOPPING;
   }
 
-  public void setState(State state) {
+  public synchronized void setState(State state) {
     System.out.println(Thread.currentThread().getName() + " set " + state.toString());
     this.state = state;
   }
 
-  public void setRandomState() {
+  public synchronized void setRandomState() {
     this.setState(State.values()[randomStateProducer.nextInt(State.values().length)]);
   }
 
@@ -34,23 +34,24 @@ public class AbstractProgram implements Runnable {
 
   @Override
   public void run() {
-      Thread daemonSetter = new Thread(() -> {
-        synchronized (AbstractProgram.this) {
-          while (!AbstractProgram.this.hasErrors()) {
-            try {
-              setRandomState();
-              notify();
-              wait();
-            } catch (InterruptedException e) {
-              break;
-            }
+    Thread daemonSetter = new Thread(() -> {
+      synchronized (AbstractProgram.this) {
+        while (!AbstractProgram.this.hasErrors()) {
+          try {
+            setRandomState();
+            notify();
+            wait();
+          } catch (InterruptedException e) {
+            break;
           }
         }
-      }, "DAemon");
+      }
+    }, "DAemon");
 
-      daemonSetter.setDaemon(true);
-      daemonSetter.start();
+    daemonSetter.setDaemon(true);
+    daemonSetter.start();
 
-      while (!Thread.currentThread().isInterrupted()) {}
+    while (!Thread.currentThread().isInterrupted()) {
+    }
   }
 }

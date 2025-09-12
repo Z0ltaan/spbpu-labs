@@ -10,8 +10,8 @@ public class QueueReader implements Runnable {
   }
 
   public void readFromQueue() {
-    System.out.println(
-        Thread.currentThread().getName() + " has removed message: '" + queue.poll() + "'");
+    System.out.println(Thread.currentThread().getName()
+        + " has removed message: '" + queue.poll() + "'");
   }
 
   @Override

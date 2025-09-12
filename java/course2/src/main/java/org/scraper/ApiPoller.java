@@ -35,7 +35,7 @@ public class ApiPoller implements Runnable {
       }
       writeData(info);
     } catch (InterruptedException | IOException e) {
-      System.err.println(e.getMessage());
+      System.err.println("Poll error: " + e.getMessage());
     } finally {
       semaphore.release();
     }
