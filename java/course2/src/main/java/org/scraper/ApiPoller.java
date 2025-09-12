@@ -3,6 +3,7 @@ package org.scraper;
 import java.io.IOException;
 import java.util.concurrent.Semaphore;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.util.EntityUtils;
@@ -34,7 +35,7 @@ public class ApiPoller implements Runnable {
                 + info.getResponseCode());
       }
       writeData(info);
-    } catch (InterruptedException | IOException e) {
+    } catch (IOException | InterruptedException e) {
       System.err.println("Poll error: " + e.getMessage());
     } finally {
       semaphore.release();
@@ -42,22 +43,16 @@ public class ApiPoller implements Runnable {
   }
 
   private ResponseInfoModel pollService() throws IOException {
-    var dataWrapper = new Object() {
-      String responseData = "";
-      int responseCode = 0;
-    };
+    String responseData = "error";
+    int responseCode = 0;
 
-    try (CloseableHttpClient client = HttpClientBuilder.create().build()) {
-      client.execute(
-          new HttpGet(service_.getUrl()),
-          response -> {
-            dataWrapper.responseCode = response.getStatusLine().getStatusCode();
-            dataWrapper.responseData = EntityUtils.toString(response.getEntity());
-            return null;
-          });
+    try (CloseableHttpClient client = HttpClientBuilder.create().build();
+        CloseableHttpResponse response = client.execute(new HttpGet(service_.getUrl()))) {
+      responseCode = response.getStatusLine().getStatusCode();
+      responseData = EntityUtils.toString(response.getEntity());
     }
 
-    return new ResponseInfoModel(dataWrapper.responseData, dataWrapper.responseCode);
+    return new ResponseInfoModel(responseData, responseCode);
   }
 
   private void writeData(ResponseInfoModel info) {
