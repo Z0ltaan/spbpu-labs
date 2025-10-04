@@ -1,0 +1,1 @@
+/usr/bin/cc CMakeFiles/olab1.dir/src/lab1utils.c.o CMakeFiles/olab1.dir/src/main.c.o -o olab1 

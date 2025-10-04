@@ -1,0 +1,1 @@
+/usr/bin/cc CMakeFiles/olab2.dir/src/father.c.o CMakeFiles/olab2.dir/src/lab2utils.c.o CMakeFiles/olab2.dir/src/main.c.o CMakeFiles/olab2.dir/src/son.c.o CMakeFiles/olab2.dir/src/threads.c.o CMakeFiles/olab2.dir/src/use_execl.c.o CMakeFiles/olab2.dir/src/use_fork.c.o -o olab2 

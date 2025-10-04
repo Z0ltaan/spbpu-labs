@@ -11,24 +11,24 @@ public class AbstractProgram implements Runnable {
     this.randomStateProducer = new Random();
   }
 
-  public synchronized boolean hasErrors() {
+  public boolean hasErrors() {
     return this.getState() == State.FATAL_ERROR;
   }
 
-  public synchronized boolean hasStopped() {
+  public boolean hasStopped() {
     return this.getState() == State.STOPPING;
   }
 
-  public synchronized void setState(State state) {
+  void setState(State state) {
     System.out.println(Thread.currentThread().getName() + " set " + state.toString());
     this.state = state;
   }
 
-  public synchronized void setRandomState() {
+  void setRandomState() {
     this.setState(State.values()[randomStateProducer.nextInt(State.values().length)]);
   }
 
-  public synchronized State getState() {
+  State getState() {
     return state;
   }
 

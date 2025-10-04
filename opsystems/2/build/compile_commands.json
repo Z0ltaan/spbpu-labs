@@ -1,0 +1,20 @@
+[
+{
+  "directory": "/home/georv/work/spbpu-labs/opsystems/2/build",
+  "command": "/usr/bin/cc    -o CMakeFiles/father.dir/src/father.c.o -c /home/georv/work/spbpu-labs/opsystems/2/src/father.c",
+  "file": "/home/georv/work/spbpu-labs/opsystems/2/src/father.c",
+  "output": "CMakeFiles/father.dir/src/father.c.o"
+},
+{
+  "directory": "/home/georv/work/spbpu-labs/opsystems/2/build",
+  "command": "/usr/bin/cc    -o CMakeFiles/son.dir/src/son.c.o -c /home/georv/work/spbpu-labs/opsystems/2/src/son.c",
+  "file": "/home/georv/work/spbpu-labs/opsystems/2/src/son.c",
+  "output": "CMakeFiles/son.dir/src/son.c.o"
+},
+{
+  "directory": "/home/georv/work/spbpu-labs/opsystems/2/build",
+  "command": "/usr/bin/cc    -o CMakeFiles/relation.dir/src/relation.c.o -c /home/georv/work/spbpu-labs/opsystems/2/src/relation.c",
+  "file": "/home/georv/work/spbpu-labs/opsystems/2/src/relation.c",
+  "output": "CMakeFiles/relation.dir/src/relation.c.o"
+}
+]

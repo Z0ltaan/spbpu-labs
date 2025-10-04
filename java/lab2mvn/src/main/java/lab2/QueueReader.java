@@ -9,15 +9,19 @@ public class QueueReader implements Runnable {
     this.queue = queue;
   }
 
-  public void readFromQueue() {
+  public void readFromQueue() throws InterruptedException {
     System.out.println(Thread.currentThread().getName()
-        + " has removed message: '" + queue.poll() + "'");
+        + " has removed message: '" + queue.take() + "'");
   }
 
   @Override
   public void run() {
     while (!Thread.currentThread().isInterrupted()) {
-      this.readFromQueue();
+      try {
+        this.readFromQueue();
+      } catch (InterruptedException e) {
+        System.err.println(e.getMessage());
+      }
     }
   }
 }

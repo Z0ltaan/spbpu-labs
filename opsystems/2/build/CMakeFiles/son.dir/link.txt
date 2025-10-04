@@ -1,0 +1,1 @@
+/usr/bin/cc CMakeFiles/son.dir/src/son.c.o -o son 

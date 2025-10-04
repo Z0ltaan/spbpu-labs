@@ -28,8 +28,7 @@ public class Main {
         Writers.shutdownNow();
         Readers.shutdownNow();
       }
-      System.out.println(queue.size());
-    } catch (NullPointerException | IllegalArgumentException | InterruptedException e) {
+    } catch (NullPointerException | IllegalArgumentException | InterruptedException | IllegalStateException e) {
       e.printStackTrace();
     }
   }

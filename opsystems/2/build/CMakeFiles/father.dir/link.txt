@@ -1,0 +1,1 @@
+/usr/bin/cc CMakeFiles/father.dir/src/father.c.o -o father 

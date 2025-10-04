@@ -1,0 +1,1 @@
+/usr/bin/cc CMakeFiles/relation.dir/src/relation.c.o -o relation 

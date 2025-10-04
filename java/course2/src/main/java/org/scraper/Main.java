@@ -33,13 +33,14 @@ public class Main {
         }
 
         pollers.awaitTermination(lifeTime, TimeUnit.SECONDS);
-        pollers.shutdownNow();
+        pollers.shutdown();
       }
     } catch (IllegalArgumentException
         | InterruptedException
         | IOException
         | NullPointerException e) {
-      System.out.println("Error: " + e.getMessage());
+      System.err.println("Error: " + e.getMessage());
+      e.printStackTrace();
     }
   }
 }

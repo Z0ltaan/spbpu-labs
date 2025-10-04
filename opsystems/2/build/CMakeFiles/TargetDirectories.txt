@@ -1,0 +1,5 @@
+/home/georv/work/spbpu-labs/opsystems/2/build/CMakeFiles/father.dir
+/home/georv/work/spbpu-labs/opsystems/2/build/CMakeFiles/son.dir
+/home/georv/work/spbpu-labs/opsystems/2/build/CMakeFiles/relation.dir
+/home/georv/work/spbpu-labs/opsystems/2/build/CMakeFiles/edit_cache.dir
+/home/georv/work/spbpu-labs/opsystems/2/build/CMakeFiles/rebuild_cache.dir
