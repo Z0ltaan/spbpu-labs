@@ -1,3 +1,0 @@
-/home/georv/work/spbpu-labs/opsystems/1/build/CMakeFiles/olab1.dir
-/home/georv/work/spbpu-labs/opsystems/1/build/CMakeFiles/edit_cache.dir
-/home/georv/work/spbpu-labs/opsystems/1/build/CMakeFiles/rebuild_cache.dir

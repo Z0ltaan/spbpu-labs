@@ -1,0 +1,14 @@
+[
+{
+  "directory": "/home/georv/work/spbpu-labs/opsystems/1/build",
+  "command": "/usr/bin/cc  -I/home/georv/repos-not-mine/winheaders/include/win32 -I/home/georv/work/spbpu-labs/opsystems/1/include  -o CMakeFiles/olab1.dir/src/lab1utils.c.o -c /home/georv/work/spbpu-labs/opsystems/1/src/lab1utils.c",
+  "file": "/home/georv/work/spbpu-labs/opsystems/1/src/lab1utils.c",
+  "output": "CMakeFiles/olab1.dir/src/lab1utils.c.o"
+},
+{
+  "directory": "/home/georv/work/spbpu-labs/opsystems/1/build",
+  "command": "/usr/bin/cc  -I/home/georv/repos-not-mine/winheaders/include/win32 -I/home/georv/work/spbpu-labs/opsystems/1/include  -o CMakeFiles/olab1.dir/src/main.c.o -c /home/georv/work/spbpu-labs/opsystems/1/src/main.c",
+  "file": "/home/georv/work/spbpu-labs/opsystems/1/src/main.c",
+  "output": "CMakeFiles/olab1.dir/src/main.c.o"
+}
+]

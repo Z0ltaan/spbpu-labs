@@ -1,0 +1,8 @@
+[
+{
+  "directory": "/home/georv/work/spbpu-labs/opsystems/1/a/build",
+  "command": "/usr/bin/cc  -I/home/georv/work/spbpu-labs/opsystems/1/a/include  -o CMakeFiles/olab1.dir/src/main.c.o -c /home/georv/work/spbpu-labs/opsystems/1/a/src/main.c",
+  "file": "/home/georv/work/spbpu-labs/opsystems/1/a/src/main.c",
+  "output": "CMakeFiles/olab1.dir/src/main.c.o"
+}
+]

@@ -1,0 +1,14 @@
+[
+{
+  "directory": "/home/georv/work/spbpu-labs/opsystems/5/a/build",
+  "command": "/usr/bin/cc  -I/home/georv/work/spbpu-labs/opsystems/5/a/include  -o CMakeFiles/client.dir/src/client.c.o -c /home/georv/work/spbpu-labs/opsystems/5/a/src/client.c",
+  "file": "/home/georv/work/spbpu-labs/opsystems/5/a/src/client.c",
+  "output": "CMakeFiles/client.dir/src/client.c.o"
+},
+{
+  "directory": "/home/georv/work/spbpu-labs/opsystems/5/a/build",
+  "command": "/usr/bin/cc  -I/home/georv/work/spbpu-labs/opsystems/5/a/include  -o CMakeFiles/server.dir/src/server.c.o -c /home/georv/work/spbpu-labs/opsystems/5/a/src/server.c",
+  "file": "/home/georv/work/spbpu-labs/opsystems/5/a/src/server.c",
+  "output": "CMakeFiles/server.dir/src/server.c.o"
+}
+]
