@@ -3,7 +3,7 @@
 
 namespace course
 {
-  using priority_t = unsigned short int;
+  using priority_t = short int;
 }
 
 #endif
