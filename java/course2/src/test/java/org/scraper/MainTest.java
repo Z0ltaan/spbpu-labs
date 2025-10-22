@@ -24,11 +24,11 @@ public class MainTest {
 
     PrintStream originalOut = System.out;
     ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-    System.setOut(new PrintStream(outContent));
+    System.setErr(new PrintStream(outContent));
 
     Main.main(args);
 
-    System.setOut(originalOut);
+    System.setErr(originalOut);
 
     assertTrue(outContent.toString().contains("Error"));
   }
@@ -39,11 +39,11 @@ public class MainTest {
 
     PrintStream originalOut = System.out;
     ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-    System.setOut(new PrintStream(outContent));
+    System.setErr(new PrintStream(outContent));
 
     Main.main(args);
 
-    System.setOut(originalOut);
+    System.setErr(originalOut);
 
     assertTrue(outContent.toString().contains("Error"));
   }
@@ -54,11 +54,11 @@ public class MainTest {
 
     PrintStream originalOut = System.out;
     ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-    System.setOut(new PrintStream(outContent));
+    System.setErr(new PrintStream(outContent));
 
     Main.main(args);
 
-    System.setOut(originalOut);
+    System.setErr(originalOut);
 
     assertTrue(outContent.toString().contains("Error"));
   }
@@ -72,11 +72,11 @@ public class MainTest {
 
       PrintStream originalOut = System.out;
       ByteArrayOutputStream outContent = new ByteArrayOutputStream();
-      System.setOut(new PrintStream(outContent));
+      System.setErr(new PrintStream(outContent));
 
       Main.main(args);
 
-      System.setOut(originalOut);
+      System.setErr(originalOut);
 
       assertFalse(outContent.toString().contains("Error"));
 

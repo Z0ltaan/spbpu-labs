@@ -4,6 +4,13 @@ from
   services;
 
 select
+  sum(c.cost_our) as co,
+  sum(c.cost_foreign) as cf
+from
+  services c;
+
+---
+select
   sum(cost_our),
   sum(cost_foreign)
 from
@@ -16,6 +23,7 @@ from
 where
   date_work >= CURRENT_DATE - INTERVAL '1 month';
 
+--
 SELECT
   c.id,
   c.num,
@@ -41,6 +49,7 @@ GROUP BY
 ORDER BY
   cost DESC;
 
+---
 SELECT
   c.is_foreign,
   COALESCE(

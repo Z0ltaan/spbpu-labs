@@ -1,0 +1,8 @@
+[
+{
+  "directory": "/home/georv/work/spbpu-labs/opsystems/synchro/2/build",
+  "command": "/usr/bin/cc    -o CMakeFiles/synchrolab.dir/src/main.c.o -c /home/georv/work/spbpu-labs/opsystems/synchro/2/src/main.c",
+  "file": "/home/georv/work/spbpu-labs/opsystems/synchro/2/src/main.c",
+  "output": "CMakeFiles/synchrolab.dir/src/main.c.o"
+}
+]

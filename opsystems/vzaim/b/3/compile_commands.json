@@ -1,0 +1,14 @@
+[
+{
+  "directory": "/home/georv/work/spbpu-labs/opsystems/vzaim/b/3/build",
+  "command": "/usr/bin/cc    -o CMakeFiles/server.dir/src/server_fifomsg.c.o -c /home/georv/work/spbpu-labs/opsystems/vzaim/b/3/src/server_fifomsg.c",
+  "file": "/home/georv/work/spbpu-labs/opsystems/vzaim/b/3/src/server_fifomsg.c",
+  "output": "CMakeFiles/server.dir/src/server_fifomsg.c.o"
+},
+{
+  "directory": "/home/georv/work/spbpu-labs/opsystems/vzaim/b/3/build",
+  "command": "/usr/bin/cc    -o CMakeFiles/client.dir/src/client_fifomsg.c.o -c /home/georv/work/spbpu-labs/opsystems/vzaim/b/3/src/client_fifomsg.c",
+  "file": "/home/georv/work/spbpu-labs/opsystems/vzaim/b/3/src/client_fifomsg.c",
+  "output": "CMakeFiles/client.dir/src/client_fifomsg.c.o"
+}
+]
