@@ -25,6 +25,7 @@ HAVING
     END
   ) > 10000;
 
+-- / /
 CREATE VIEW masters_acc_year AS
 SELECT
   m.id,

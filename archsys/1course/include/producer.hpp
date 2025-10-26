@@ -1,0 +1,31 @@
+#ifndef PRODUCER_HPP
+#define PRODUCER_HPP
+
+// #include "abstractProducer.hpp"
+#include <cstddef>
+#include "priority.hpp"
+// #include "request.hpp"
+
+namespace course
+{
+  class SimpleRequest;
+
+  class Producer
+  {
+  public:
+    using requestid_t = size_t;
+
+    Producer();
+    Producer(deviceid_t id);
+    virtual SimpleRequest produceRequest();
+    virtual void setId(deviceid_t rhs);
+    virtual deviceid_t getId() const;
+    virtual requestid_t getRequestCount() const;
+
+  private:
+    deviceid_t producerId_;
+    requestid_t requestCount_;
+  };
+} // namespace course
+
+#endif

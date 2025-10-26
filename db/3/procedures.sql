@@ -35,6 +35,7 @@ END;
 $$;
 
 
+-- kk
 CREATE OR REPLACE PROCEDURE get_service_cost_and_number(carid INTEGER, serviceid INTEGER)
 LANGUAGE plpgsql AS $$
 DECLARE
@@ -55,34 +56,14 @@ BEGIN
     JOIN cars c ON w.car_id = c.id
     WHERE s.id = serviceid
       AND c.id = carid;
-    
-    -- Выводим результат
+
     RAISE INFO 'Услуга: "%" для автомобиля "%"', serviceid, carid;
     RAISE INFO 'Общая стоимость за все время: %', total_cost;
     RAISE INFO 'Количество проведенных работ: %', works_count;
 END;
 $$;
 
-CREATE OR REPLACE PROCEDURE simple_cars_stats()
-LANGUAGE SQL
-AS $$
-    SELECT 
-        c.num AS car_number,
-        c.mark,
-        COALESCE(AVG(
-            CASE 
-                WHEN c.is_foreign THEN s.cost_foreign 
-                ELSE s.cost_our 
-            END
-        ), 0) AS avg_cost,
-        COUNT(w.id) AS works_count
-    FROM cars c
-    LEFT JOIN works w ON c.id = w.car_id
-    LEFT JOIN services s ON w.service_id = s.id
-    GROUP BY c.id, c.num, c.mark
-    ORDER BY avg_cost DESC;
-$$;
-  
+--ll
 CREATE OR REPLACE PROCEDURE get_service_amount_by_masters(masterid1 INTEGER, masterid2 INTEGER, INOUT m1amount INTEGER DEFAULT 0, INOUT m2amount INTEGER DEFAULT 0) LANGUAGE plpgsql AS $$
   BEGIN
      SELECT COUNT(*) INTO m1amount FROM works WHERE master_id = masterid1 ;

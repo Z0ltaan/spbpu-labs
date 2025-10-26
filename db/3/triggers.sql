@@ -13,7 +13,7 @@ $$;
 
 CREATE OR REPLACE TRIGGER forbid_non_unique_car_numbers BEFORE INSERT ON cars FOR EACH ROW EXECUTE FUNCTION check_if_num_is_unique();
 
-
+-- kkk
 CREATE OR REPLACE FUNCTION check_if_date_isnt_within_day() RETURNS TRIGGER
 LANGUAGE plpgsql
 AS $$
@@ -27,6 +27,7 @@ $$;
 
 CREATE OR REPLACE TRIGGER forbid_more_than_day_date_change BEFORE UPDATE ON works FOR EACH ROW EXECUTE FUNCTION check_if_date_isnt_within_day();
 
+--kk
 CREATE OR REPLACE FUNCTION prevent_car_deletion_with_works()
 RETURNS TRIGGER 
 LANGUAGE plpgsql
