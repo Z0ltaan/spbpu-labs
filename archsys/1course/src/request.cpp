@@ -6,5 +6,6 @@ course::SimpleRequest::data_t course::SimpleRequest::getData() const noexcept { 
 
 course::SimpleRequest::SimpleRequest(deviceid_t device, requestid_t request) : requestData_(device, request) {}
 
-bool course::SimpleRequest::isEmpty() const noexcept { return requestData_.first == EMPTY; }
+// bool course::SimpleRequest::isEmpty() const noexcept { return requestData_.first == EMPTY; }
 // void setData
+bool course::isEmpty(const SimpleRequest &rhs) { return rhs.getData().first == EMPTY; }

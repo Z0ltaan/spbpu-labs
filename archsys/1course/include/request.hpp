@@ -7,7 +7,6 @@
 
 namespace course
 {
-
   class SimpleRequest //: public Request
   {
   public:
@@ -23,7 +22,7 @@ namespace course
     // const SimpleRequest &operator=(const SimpleRequest &rhs) const;
 
     virtual data_t getData() const noexcept;
-    virtual bool isEmpty() const noexcept;
+    // virtual bool isEmpty() const noexcept;
     // virtual void setData(const data_t &rhs);
     // virtual void emplaceData(deviceid_t, requestid_t);
     ~SimpleRequest(); // override;
@@ -31,6 +30,8 @@ namespace course
   private:
     data_t requestData_;
   };
+
+  bool isEmpty(const SimpleRequest &rhs);
 } // namespace course
 
 #endif

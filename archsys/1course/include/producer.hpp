@@ -1,10 +1,8 @@
 #ifndef PRODUCER_HPP
 #define PRODUCER_HPP
 
-// #include "abstractProducer.hpp"
 #include <cstddef>
 #include "priority.hpp"
-// #include "request.hpp"
 
 namespace course
 {
@@ -13,8 +11,6 @@ namespace course
   class Producer
   {
   public:
-    using requestid_t = size_t;
-
     Producer();
     Producer(deviceid_t id);
     virtual SimpleRequest produceRequest();

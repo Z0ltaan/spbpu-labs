@@ -12,12 +12,12 @@ namespace course
     Device();
     Device(deviceid_t id);
     virtual void processRequest(const SimpleRequest &request);
-    // virtual SimpleRequest::data_t getRequestData();
+    virtual SimpleRequest::data_t getRequestData();
 
   private:
     deviceid_t deviceId_;
     requestid_t processedRequestsCount_;
-    // SimpleRequest currentRequest_;
+    SimpleRequest currentRequest_;
   };
 } // namespace course
 
