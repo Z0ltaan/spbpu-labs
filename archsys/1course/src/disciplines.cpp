@@ -1,17 +1,13 @@
 #include "disciplines.hpp"
-#include <algorithm>
 #include <cstddef>
-#include <iterator>
 #include <stdexcept>
-#include <utility>
 #include "buffer.hpp"
 #include "priority.hpp"
 #include "request.hpp"
 
-course::deviceid_t course::chooseBufferSpot(const Buffer &buff)
+course::deviceid_t course::chooseFirstEmptyBufferSpot(const Buffer &buff)
 {
   size_t spotId = 0;
-  // std::for_each(buff.begin(), buff.end(), [&](const auto & item) -> void { })
   for (; spotId < buff.size(); ++spotId)
   {
     if (isEmpty(buff[spotId]))
@@ -26,13 +22,41 @@ course::deviceid_t course::chooseBufferSpot(const Buffer &buff)
   return spotId;
 }
 
-course::deviceid_t course::chooseRequestFromBufferByProducerNumber(const Buffer &buff)
+size_t course::chooseRequestFromBufferByProducerNumber(const Buffer &buff)
 {
-  std::pair< size_t, deviceid_t > chosenRequest{0, EMPTY};
+  SimpleRequest chosenRequest(EMPTY, 0);
+  size_t pos = 0;
+
   for (size_t i = 0; i < buff.size(); ++i)
   {
-    if ()
+    if (chosenRequest > buff[i])
+    {
+      chosenRequest = buff[i];
+      pos = i;
+    }
   }
+
+  if (isEmpty(chosenRequest))
+  {
+    throw std::runtime_error("No requests in buffer");
+  }
+
+  return pos;
 }
 
-course::deviceid_t course::chooseDevice(const collection_t< Device > &collection) { return 0; }
+course::deviceid_t course::chooseDeviceById(const collection_t< Device > &collection)
+{
+  size_t deviceId = 0;
+  for (; deviceId < collection.size(); ++deviceId)
+  {
+    if (collection[deviceId].isFree())
+    {
+      break;
+    }
+  }
+  if (deviceId == collection.size())
+  {
+    throw std::runtime_error("No empty devices");
+  }
+  return deviceId;
+}

@@ -1,7 +1,7 @@
 #include <fcntl.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
-// #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -12,8 +12,11 @@
 
 void server(int readfd, int writefd);
 
+void hndlr(int sig); // обработчик сигнала SIGINT
+
 int main(int argc, char **argv) {
   int readfd, writefd;
+  signal(SIGINT, hndlr);
 
   // Создаем именованные каналы (FIFO)
   if (mknod(FIFO1, S_IFIFO | 0666, 0) < 0) {
@@ -53,6 +56,12 @@ int main(int argc, char **argv) {
   exit(0);
 }
 
+void hndlr(int sig) // обработчик сигнала SIGINT
+{
+  unlink(FIFO1);
+  unlink(FIFO2);
+}
+
 void server(int readfd, int writefd) {
   char buff[MAXLINE];
   int n;
@@ -64,14 +73,14 @@ void server(int readfd, int writefd) {
     buff[n] = '\0'; // Добавляем нулевой терминатор
     printf("Server: received request: %s", buff);
 
-    // Эмулируем обработку запроса (просто преобразуем в верхний регистр)
+    // преобразуем регистр сообщения для разницы сообщений от сервера
     for (int i = 0; i < n; i++) {
       if (buff[i] >= 'a' && buff[i] <= 'z') {
         buff[i] = buff[i] - 'a' + 'A';
       }
     }
 
-    // Отправляем ответ клиенту
+    // Отправляем ответ
     write(writefd, buff, n);
     printf("Server: sent response: %s", buff);
   }

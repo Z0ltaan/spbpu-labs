@@ -11,8 +11,12 @@ namespace course
   public:
     Device();
     Device(deviceid_t id);
-    virtual void processRequest(const SimpleRequest &request);
-    virtual SimpleRequest::data_t getRequestData();
+    virtual deviceid_t getId() const noexcept;
+    virtual void setId(deviceid_t id);
+    virtual void setRequest(const SimpleRequest &rhs) noexcept;
+    virtual void processRequest();
+    virtual SimpleRequest getRequest() const noexcept;
+    virtual bool isFree() const noexcept;
 
   private:
     deviceid_t deviceId_;

@@ -5,16 +5,15 @@
 #include "buffer.hpp"
 #include "device.hpp"
 #include "priority.hpp"
-#include "producer.hpp"
 
 namespace course
 {
   template < class T >
   using collection_t = std::vector< T >;
 
-  deviceid_t chooseBufferSpot(const Buffer &buff);
-  deviceid_t chooseRequestFromBufferByProducerNumber(const Buffer &buff);
-  deviceid_t chooseDevice(const collection_t< Device > &collection);
+  deviceid_t chooseFirstEmptyBufferSpot(const Buffer &buff);
+  size_t chooseRequestFromBufferByProducerNumber(const Buffer &buff);
+  deviceid_t chooseDeviceById(const collection_t< Device > &collection);
 
 } // namespace course
 #endif

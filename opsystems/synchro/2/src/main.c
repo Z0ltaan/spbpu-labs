@@ -34,7 +34,7 @@ int main(int argc, char **argv) {
   }
 
   if (pthread_create(&tid_produce, NULL, produce, NULL)) {
-    perror("pthread_create produce");
+    perror("pthread_create produce\n");
     sem_unlink("/mutex");
     sem_unlink("/nempty");
     sem_unlink("/nstored");
@@ -45,7 +45,7 @@ int main(int argc, char **argv) {
     exit(1);
   }
   if (pthread_create(&tid_consume, NULL, consume, NULL)) {
-    perror("pthread_create consume");
+    perror("pthread_create consume\n");
     sem_unlink("/mutex");
     sem_unlink("/nempty");
     sem_unlink("/nstored");

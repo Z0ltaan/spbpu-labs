@@ -11,6 +11,71 @@
 Message *msgptr;
 int shmid, semid;
 
+void hndlr(int sig); // обработчик сигнала SIGINT
+
+int main(int argc, char **argv) {
+  key_t key;
+  signal(SIGINT, hndlr);
+
+  if (argc != 2) {
+    printf("wrong number of args");
+    exit(-1);
+  }
+  // получение идентификатора разделяемого ресурса как для семафора так и для
+  // разделяемой памяти
+  if ((key = ftok(argv[1], 'A')) < 0) {
+    printf("Server: can't get a key\n");
+    exit(-1);
+  }
+  // создание области разделяемой памяти
+  if ((shmid = shmget(key, sizeof(Message), PERM | IPC_CREAT)) < 0) {
+    printf("Server: can't create an area\n");
+    exit(-1);
+  }
+  printf("Server: area is created\n");
+
+  // присоединение области
+  if ((msgptr = (Message *)shmat(shmid, 0, 0)) < 0) {
+    printf("Server: error of joining\n");
+    exit(-1);
+  }
+  printf("Server: area is joined\n");
+
+  // создание группы из 2 семафоров
+  // 1 – для синхронизации работы с разделяемой памятью
+  // 2 – для синхронизации выполнения процессов
+  if ((semid = semget(key, 2, PERM | IPC_CREAT)) < 0) {
+    printf("Server: can't create a semaphore\n");
+    exit(-1);
+  }
+  printf("Server: semaphores are created\n");
+
+  while (1) {
+    // ожидание начала работы клиента
+    if (semop(semid, &proc_wait[0], 1) < 0) {
+      printf("Server: execution complete\n");
+      exit(-1);
+    }
+    printf("post proc wait\n");
+    // ожидание завершения работы клиента с разделяемой памятью
+    if (semop(semid, &mem_lock[0], 2) < 0) {
+      printf("Server: can't execute a operation\n");
+      exit(-1);
+    }
+
+    // вывод сообщения, записанного клиентом в разделяемую память
+    printf("Server: read message\n%s", msgptr->buff);
+
+    // запись сообщения в разделяемую память
+    sprintf(msgptr->buff, "Message from server with PID = %d\n", getpid());
+    // освобождение ресурса
+    if (semop(semid, &mem_unlock[0], 1) < 0) {
+      printf("Server: can't execute a operation\n");
+      exit(-1);
+    }
+  }
+}
+
 void hndlr(int sig) // обработчик сигнала SIGINT
 {
   // отключение от области разделяемой памяти
@@ -29,60 +94,4 @@ void hndlr(int sig) // обработчик сигнала SIGINT
     exit(-1);
   }
   printf("Server: semaphores are deleted\n");
-}
-
-int main(int argc, char **argv) {
-  key_t key;
-  signal(SIGINT, hndlr);
-
-  if (argc != 2) {
-    printf("wrong number of args");
-    exit(-1);
-  }
-  // получение ключа как для семафора так и для разделяемой памяти
-  if ((key = ftok(argv[1], 'A')) < 0) {
-    printf("Server: can't get a key\n");
-    exit(-1);
-  }
-  // создание области разделяемой памяти
-  if ((shmid = shmget(key, sizeof(Message), PERM | IPC_CREAT)) < 0) {
-    printf("Server: can't create an area\n");
-    exit(-1);
-  }
-  printf("Server: area is created\n");
-  // присоединение области
-  if ((msgptr = (Message *)shmat(shmid, 0, 0)) < 0) {
-    printf("Server: error of joining\n");
-    exit(-1);
-  }
-  printf("Server: area is joined\n");
-  // создание группы из 2 семафоров
-  // 1 – для синхронизации работы с разделяемой памятью
-  // 2 – для синхронизации выполнения процессов
-  if ((semid = semget(key, 2, PERM | IPC_CREAT)) < 0) {
-    printf("Server: can't create a semaphore\n");
-    exit(-1);
-  }
-  printf("Server: semaphores are created\n");
-  while (1) {
-    // ожидание начала работы клиента
-    if (semop(semid, &proc_wait[0], 1) < 0) {
-      printf("Server: execution complete\n");
-      exit(-1);
-    }
-    // ожидание завершения работы клиента с разделяемой памятью
-    if (semop(semid, &mem_lock[0], 2) < 0) {
-      printf("Server: can't execute a operation\n");
-      exit(-1);
-    }
-    // вывод сообщения, записанного клиентом в разделяемую память
-    printf("Server: read message\n%s", msgptr->buff);
-    // запись сообщения в разделяемую память
-    sprintf(msgptr->buff, "Message from server with PID = %d\n", getpid());
-    // освобождение ресурса
-    if (semop(semid, &mem_unlock[0], 1) < 0) {
-      printf("Server: can't execute a operation\n");
-      exit(-1);
-    }
-  }
 }

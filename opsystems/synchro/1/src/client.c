@@ -10,6 +10,7 @@ int main(int argc, char **argv) {
   key_t key;
   int shmid, semid;
 
+  // printf("%d\n", IPC_NOWAIT);
   if (argc != 2) {
     printf("Wrong args");
     return 0;
