@@ -45,7 +45,7 @@ void client(int readfd, int writefd) {
 
   len = strlen(buff);
   if (len > 0 && buff[len - 1] == '\n')
-    buff[--len] = '\0'; // Remove newline
+    buff[--len] = '\0';
 
   // Send filename to server
   write(writefd, buff, len);
@@ -64,18 +64,16 @@ void server(int readfd, int writefd) {
 
   // Read filename from client
   if ((n = read(readfd, buff, MAXLINE)) > 0) {
-    buff[n] = '\0'; // Null-terminate the string
+    buff[n] = '\0';
 
     printf("Server received filename: %s\n", buff);
 
     // Try to open the file
     if ((fd = open(buff, O_RDONLY)) < 0) {
-      // Send error message
       write(writefd, err_msg, strlen(err_msg));
       printf("Server: Cannot open file '%s'\n", buff);
     } else {
       printf("Server opened file: %s\n", buff);
-      // Send file contents
       while ((n = read(fd, buff, MAXLINE)) > 0) {
         write(writefd, buff, n);
       }

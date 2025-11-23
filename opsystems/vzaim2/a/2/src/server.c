@@ -1,4 +1,3 @@
-#include <errno.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -16,14 +15,13 @@ struct message {
   pid_t client_pid;
 };
 
-static int msgid = -1;
+int msgid = -1;
 
 // Обработчик сигнала SIGINT
 void sigint_handler(int sig) {
   printf("\nServer got interrupted\n");
 
   if (msgid != -1) {
-    // Удаляем очередь сообщений
     if (msgctl(msgid, IPC_RMID, NULL) == -1) {
       perror("msgctl");
     } else {
@@ -63,13 +61,12 @@ int main() {
 
     if (msgrcv(msgid, &msg, sizeof(msg.mtext) + sizeof(msg.client_pid), 1, 0) ==
         -1) {
-      if (errno == EINTR) {
-        // Прервано сигналом
-        continue;
-      }
+      // if (errno == EINTR) {
+      //   // Прервано сигналом
+      //   continue;
+      // }
       perror("msgrcv");
       kill(getpid(), SIGINT);
-      continue;
     }
 
     printf("Server got a message for client (PID: %d): %s\n", msg.client_pid,
@@ -89,7 +86,6 @@ int main() {
                sizeof(response.mtext) + sizeof(response.client_pid), 0) == -1) {
       perror("msgsnd");
       kill(getpid(), SIGINT);
-      continue;
     }
 
     printf("Server sent a response: %s\n", response.mtext);

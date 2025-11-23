@@ -23,9 +23,8 @@ ssize_t mesg_recv(int fd, struct mymesg *mptr);
 // void hndlr(int);
 
 int main(int argc, char **argv) {
-  int readfd, writefd;
-  // signal(SIGINT, hndlr);
 
+  int readfd, writefd;
   if ((writefd = open(FIFO1, O_WRONLY)) < 0) {
     printf("Client: can not open FIFO1 for write\n");
     exit(1);

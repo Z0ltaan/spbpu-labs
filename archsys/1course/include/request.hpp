@@ -10,19 +10,21 @@ namespace course
   {
   public:
     using data_t = std::pair< deviceid_t, requestid_t >;
+    using time_t = double;
 
-    SimpleRequest() : requestData_(EMPTY, 0) {};
-    // ~SimpleRequest() = default;
+    SimpleRequest() : requestData_(EMPTY, 0), produceTime_(0.0) {};
 
-    SimpleRequest(const data_t &rhs);
-    SimpleRequest(deviceid_t, requestid_t);
+    SimpleRequest(const data_t &rhs, time_t produceTime = 0.0);
+    SimpleRequest(deviceid_t, requestid_t, time_t produceTime = 0.0);
 
-    virtual data_t getData() const noexcept;
-    virtual deviceid_t getProducerId() const noexcept;
-    virtual requestid_t getRequestNumber() const noexcept;
+    const data_t &data() const noexcept;
+    deviceid_t producerId() const noexcept;
+    requestid_t requestNumber() const noexcept;
+    time_t time() const noexcept;
 
   private:
     data_t requestData_;
+    time_t produceTime_;
   };
 
   bool isEmpty(const SimpleRequest &rhs);

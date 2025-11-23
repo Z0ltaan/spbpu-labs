@@ -32,25 +32,11 @@ int main(int argc, char **argv) {
 
   printf("Server: Hello tvk!\n");
 
-  /*
-          if((key1=ftok("/home/tvk/IPC/input.txt",'A'))<0)
-          {
-                  printf("Server: can not get key!\n"); exit(1);
-          }
-          printf("key1=%x\n",key1);
-  */
   if ((readid = msgget(MQ_KEY1, 0666 | IPC_CREAT)) < 0) {
     printf("Server: can not get readid!\n");
     exit(1);
   }
   printf("Server: readid=%d\n", readid);
-  /*
-          if((key2=ftok("/home/tvk/IPC/server_msg.c",'B'))<0)
-          {
-                  printf("Server: can not get key!\n"); exit(1);
-          }
-          printf("key2=%x\n",key2);
-  */
   if ((writeid = msgget(MQ_KEY2, 0666 | IPC_CREAT)) < 0) {
     printf("Server: can not get readid!\n");
     exit(1);

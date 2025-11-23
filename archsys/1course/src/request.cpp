@@ -1,23 +1,29 @@
 #include "request.hpp"
 
-course::SimpleRequest::SimpleRequest(const data_t &rhs) : requestData_(rhs) {}
+course::SimpleRequest::SimpleRequest(const data_t &rhs, time_t produceTime) :
+    requestData_(rhs), produceTime_(produceTime)
+{}
 
-course::SimpleRequest::data_t course::SimpleRequest::getData() const noexcept { return requestData_; }
+const course::SimpleRequest::data_t &course::SimpleRequest::data() const noexcept { return requestData_; }
 
-course::SimpleRequest::SimpleRequest(deviceid_t device, requestid_t request) : requestData_(device, request) {}
+course::SimpleRequest::SimpleRequest(deviceid_t device, requestid_t request, time_t produceTime) :
+    requestData_(device, request), produceTime_(produceTime)
+{}
 
-bool course::isEmpty(const SimpleRequest &rhs) { return rhs.getData().first == EMPTY; }
+bool course::isEmpty(const SimpleRequest &rhs) { return rhs.producerId() == EMPTY; }
 
-course::deviceid_t course::SimpleRequest::getProducerId() const noexcept { return requestData_.first; }
+course::deviceid_t course::SimpleRequest::producerId() const noexcept { return requestData_.first; }
 
-course::requestid_t course::SimpleRequest::getRequestNumber() const noexcept { return requestData_.second; }
+course::requestid_t course::SimpleRequest::requestNumber() const noexcept { return requestData_.second; }
 
 bool course::operator>(const SimpleRequest &lhs, const SimpleRequest &rhs)
 {
-  return lhs.getProducerId() > rhs.getProducerId();
+  return lhs.producerId() > rhs.producerId();
 }
 
 bool course::operator==(const SimpleRequest &lhs, const SimpleRequest &rhs)
 {
-  return lhs.getProducerId() == rhs.getProducerId() && lhs.getRequestNumber() == rhs.getRequestNumber();
+  return lhs.producerId() == rhs.producerId() && lhs.requestNumber() == rhs.requestNumber();
 }
+
+course::SimpleRequest::time_t course::SimpleRequest::time() const noexcept { return produceTime_; }

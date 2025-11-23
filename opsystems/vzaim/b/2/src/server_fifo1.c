@@ -51,7 +51,8 @@ int main(int argc, char **argv) {
   // Закрываем дескрипторы
   close(readfd);
   close(writefd);
-
+  unlink(FIFO1);
+  unlink(FIFO2);
   printf("Server is terminated!\n");
   exit(0);
 }

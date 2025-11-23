@@ -62,7 +62,6 @@ void client(int readid, int writeid) {
     perror("No message\n");
     exit(3);
   }
-  // len = strlen(ourmesg.mesg_data);
   if ((len = strlen(ourmesg.mesg_data)) == 1) {
     perror("No message\n");
     exit(3);
@@ -77,7 +76,7 @@ void client(int readid, int writeid) {
 
   mesg_send(writeid, &ourmesg);
 
-  printf("Client: tvk before recv!\n");
+  printf("Client: message sent\n");
 
   while ((n = mesg_recv(readid, &ourmesg)) > 0)
     write(1, ourmesg.mesg_data, n);

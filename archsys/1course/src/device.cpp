@@ -1,24 +1,39 @@
 #include "device.hpp"
-#include <thread>
 #include "priority.hpp"
 #include "request.hpp"
 
-course::Device::Device() : deviceId_(0), processedRequestsCount_(0) {}
+course::Device::Device(generator_t gen) :
+    deviceId_(0), processedRequestsCount_(0), currentRequest_(), nextProcessingFinish_(0.0), gen_(gen)
+{}
 
-course::Device::Device(deviceid_t id) : deviceId_(id), processedRequestsCount_(0) {}
+course::Device::Device(deviceid_t id, generator_t gen) :
+    deviceId_(id), processedRequestsCount_(0), currentRequest_(), nextProcessingFinish_(0.0), gen_(gen)
+{}
 
-course::deviceid_t course::Device::getId() const noexcept { return deviceId_; }
+course::deviceid_t course::Device::id() const noexcept { return deviceId_; }
+
+course::requestid_t course::Device::processedRequests() const noexcept { return processedRequestsCount_; }
 
 void course::Device::setId(course::deviceid_t id) { deviceId_ = id; }
 
-void course::Device::setRequest(const SimpleRequest &rhs) noexcept { currentRequest_ = rhs; }
-
-void course::Device::processRequest()
+void course::Device::setRequest(const SimpleRequest &rhs, time_t start) noexcept
 {
-  std::this_thread::sleep_for(std::chrono::milliseconds(30));
-  ++processedRequestsCount_;
+  currentRequest_ = rhs;
+  if (!isEmpty(rhs))
+  {
+    time_t startTime = (start == 0.0 ? time() : start);
+    setNextProcessingFinish(startTime + getNextProcessingTime());
+  }
 }
 
-course::SimpleRequest course::Device::getRequest() const noexcept { return currentRequest_; }
+void course::Device::finishProcessing()
+{
+  ++processedRequestsCount_;
+  setRequest(SimpleRequest());
+}
 
-bool course::Device::isFree() const noexcept { return isEmpty(currentRequest_); }
+course::Device::time_t course::Device::time() const noexcept { return nextProcessingFinish_; }
+
+course::SimpleRequest course::Device::currentRequest() const noexcept { return currentRequest_; }
+
+bool course::Device::empty() const noexcept { return isEmpty(currentRequest_); }
