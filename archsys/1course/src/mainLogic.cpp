@@ -10,8 +10,8 @@
 #include "buffer.hpp"
 #include "configuration.hpp"
 #include "device.hpp"
+#include "gui/mode_layouts.hpp"
 #include "producer.hpp"
-#include "request.hpp"
 #include "utils/circled_operations.hpp"
 #include "utils/idSetter.hpp"
 
@@ -23,15 +23,6 @@ static void glfw_error_callback(int error, const char *description)
   fprintf(stderr, "GLFW Error %d: %s\n", error, description);
 }
 
-void call_automatic_mode_layout(const course::ProgramState &state);
-void call_interactive_mode_layout(course::ProgramState &state);
-
-// NOTE: ONLY FOR NOW interactive mode option
-course::ProgramConfiguration config{11, 10, 5, 100.0};
-bool interactive_mode = true;
-size_t programFlowPos = 0;
-std::vector< course::ProgramState > programFlow;
-
 int course::mainLogic(int argc, char **argv)
 {
   glfwSetErrorCallback(glfw_error_callback);
@@ -41,6 +32,12 @@ int course::mainLogic(int argc, char **argv)
   const char *glsl_version = "#version 330";
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+
+  // NOTE: ONLY FOR NOW interactive mode option
+  course::ProgramConfiguration config{11, 10, 5, 100.0};
+  bool interactive_mode = true;
+  size_t programFlowPos = 0;
+  std::vector< course::ProgramState > programFlow;
 
   // initial programState
   ProgramState current_state{std::vector< Producer >(), std::vector< Device >(), Buffer(config.bufferSize)};
@@ -121,11 +118,38 @@ int course::mainLogic(int argc, char **argv)
 
     if (interactive_mode)
     {
-      call_interactive_mode_layout(current_state);
+      ImGui::Begin("Interactive mode");
+
+      // get all main content
+      course::call_interactive_mode_layout(current_state);
+
+      // add some interaction with content
+      if (ImGui::Button("Previous state"))
+      {
+        course::circle_decrement(programFlowPos, 0, programFlow.size() - 1);
+        current_state = programFlow[programFlowPos];
+      }
+      ImGui::SameLine();
+      ImGui::Text(" %ld / %ld ", programFlowPos + 1, programFlow.size());
+      ImGui::SameLine();
+      if (ImGui::Button("Next state"))
+      {
+        course::circle_increment(programFlowPos, 0, programFlow.size() - 1);
+        current_state = programFlow[programFlowPos];
+      }
+      if (ImGui::Button("Finish simulation"))
+      {
+        interactive_mode = false;
+      }
+      ImGui::End();
     }
     else
     {
-      call_automatic_mode_layout(current_state);
+      ImGui::Begin("Automatic mode");
+
+      course::call_automatic_mode_layout(current_state);
+
+      ImGui::End();
     }
 
     // Rendering
@@ -150,138 +174,4 @@ int course::mainLogic(int argc, char **argv)
   glfwTerminate();
 
   return 0;
-}
-
-void call_interactive_mode_layout(course::ProgramState &state)
-{
-  ImGui::Begin("Interactive mode");
-
-  static ImGuiTableFlags flags =
-      ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingStretchSame | ImGuiTableFlags_Resizable;
-  ImGui::Text("Producers info"); // Display some text (you can
-  if (ImGui::BeginTable("producer", 3, flags))
-  {
-    ImGui::TableSetupColumn("Name");
-    ImGui::TableSetupColumn("Timestamp");
-    ImGui::TableSetupColumn("Produced");
-    ImGui::TableHeadersRow();
-    for (int row = 0; row < state.producers.size(); row++)
-    {
-      const auto &current = state.producers[row];
-      ImGui::TableNextRow();
-      ImGui::TableNextColumn();
-      ImGui::Text("P%d", current.id());
-      ImGui::TableNextColumn();
-      ImGui::Text("%f", current.time());
-      ImGui::TableNextColumn();
-      ImGui::Text("%ld", current.requestCount());
-    }
-    ImGui::EndTable();
-  }
-
-  ImGui::Text("Devices info"); // Display some text (you can
-  if (ImGui::BeginTable("devices", 4, flags))
-  {
-    ImGui::TableNextColumn();
-    ImGui::TableHeader("Name");
-    ImGui::TableNextColumn();
-    ImGui::TableHeader("Timestamp");
-    ImGui::TableNextColumn();
-    ImGui::TableHeader("State");
-    ImGui::TableNextColumn();
-    ImGui::TableHeader("Processed");
-    for (int row = 0; row < state.devices.size(); row++)
-    {
-      const auto &current = state.devices[row];
-      ImGui::TableNextRow();
-      ImGui::TableNextColumn();
-      ImGui::Text("D%d", current.id()); // name
-      ImGui::TableNextColumn();
-      ImGui::Text("%f", current.time());
-      ImGui::TableNextColumn();
-      ImGui::Text("%s", current.empty() ? "Free" : "Occupied");
-      ImGui::TableNextColumn();
-      ImGui::Text("%ld", current.processedRequests());
-    }
-    ImGui::EndTable();
-  }
-  ImGui::Text("Buffer"); // Display some text (you can
-  if (ImGui::BeginTable("buffer", 3, flags))
-  {
-    ImGui::TableNextColumn();
-    ImGui::TableHeader("Slot id");
-    ImGui::TableNextColumn();
-    ImGui::TableHeader("Timestamp");
-    ImGui::TableNextColumn();
-    ImGui::TableHeader("Producer id");
-    const auto &buff = state.buffer;
-    for (size_t row = 0; row < buff.size(); row++)
-    {
-      ImGui::TableNextRow();
-      ImGui::TableNextColumn();
-      ImGui::Text("%ld", row);
-      ImGui::TableNextColumn();
-      ImGui::Text("%f", buff[row].time());
-      ImGui::TableNextColumn();
-      ImGui::Text("%d", buff[row].producerId());
-    }
-    ImGui::EndTable();
-  }
-
-  if (ImGui::Button("Previous state"))
-  {
-    course::circle_decrement(programFlowPos, 0, programFlow.size() - 1);
-    state = programFlow[programFlowPos];
-  }
-  ImGui::SameLine();
-  ImGui::Text(" %ld / %ld ", programFlowPos + 1, programFlow.size());
-  ImGui::SameLine();
-  if (ImGui::Button("Next state"))
-  {
-    course::circle_increment(programFlowPos, 0, programFlow.size() - 1);
-    state = programFlow[programFlowPos];
-  }
-  if (ImGui::Button("Finish simulation"))
-  {
-    interactive_mode = false;
-  }
-  ImGui::End();
-}
-
-void call_automatic_mode_layout(const course::ProgramState &state)
-{
-  ImGui::Begin("Automatic mode");
-
-  if (ImGui::BeginTable("graphs", 8, ImGuiTableFlags_SizingStretchSame | ImGuiTableFlags_Resizable))
-  {
-    ImGui::TableSetupColumn("Producer count");
-    ImGui::TableSetupColumn("Device count");
-    ImGui::TableSetupColumn("Prod bounds");
-    ImGui::TableSetupColumn("Exp dist lamdba");
-    ImGui::TableSetupColumn("Buffer size");
-    ImGui::TableSetupColumn("P canc");
-    ImGui::TableSetupColumn("T req");
-    ImGui::TableSetupColumn("Workload");
-    ImGui::TableHeadersRow();
-
-    ImGui::TableNextColumn();
-    ImGui::Text("%ld", state.producers.size());
-    ImGui::TableNextColumn();
-    ImGui::Text("%ld", state.devices.size());
-    ImGui::TableNextColumn();
-    ImGui::Text("{ %f , %f }", 2.0, 5.0);
-    ImGui::TableNextColumn();
-    ImGui::Text("%f", 7.0);
-    ImGui::TableNextColumn();
-    ImGui::Text("%ld", state.buffer.size());
-    ImGui::TableNextColumn();
-    ImGui::Text("%f", double(state.canceled_requests) / double(state.produced_requests));
-    ImGui::TableNextColumn();
-    ImGui::Text("%f", double(state.accumulatedRequestTime) / double(state.processed_requests));
-    ImGui::TableNextColumn();
-    ImGui::Text("%f", 3.5 / 7.0);
-    ImGui::EndTable();
-  }
-
-  ImGui::End();
 }
