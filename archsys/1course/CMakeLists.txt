@@ -5,7 +5,7 @@ find_package(glfw3 REQUIRED)
 find_package(OpenGL REQUIRED)
 
 # collect all source files
-file(GLOB source_files ${CMAKE_SOURCE_DIR}/src/*.cpp)
+file(GLOB_RECURSE source_files ${CMAKE_SOURCE_DIR}/src/*.cpp)
 file(GLOB_RECURSE imgui_files ${CMAKE_HOME_DIRECTORY}/imgui/*.cpp)
 
 if(CMAKE_EXPORT_COMPILE_COMMANDS)

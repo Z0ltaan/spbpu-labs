@@ -1,76 +1,22 @@
 #include "mainLogic.hpp"
 #include <algorithm>
 #include <cmath>
-#include <cstddef>
-#include <exception>
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
-#include <iostream>
 #include <iterator>
-#include <ostream>
 #include <stdio.h>
 #include <vector>
 #include "buffer.hpp"
+#include "configuration.hpp"
 #include "device.hpp"
-#include "disciplines.hpp"
-#include "priority.hpp"
 #include "producer.hpp"
 #include "request.hpp"
+#include "utils/circled_operations.hpp"
 #include "utils/idSetter.hpp"
 
 #define GL_SILENCE_DEPRECATION
 #include <GLFW/glfw3.h> // Will drag system OpenGL headers
-
-void circle_increment(size_t &value, size_t lower_bound, size_t upper_bound)
-{
-  if (value >= upper_bound)
-  {
-    value = lower_bound;
-  }
-  else
-  {
-    value++;
-  }
-}
-
-void circle_decrement(size_t &value, size_t lower_bound, size_t upper_bound)
-{
-  if (value <= lower_bound)
-  {
-    value = upper_bound;
-  }
-  else
-  {
-    value--;
-  }
-}
-
-namespace course
-{
-  struct ProgramState
-  {
-    std::vector< Producer > producers;
-    std::vector< Device > devices;
-    Buffer buffer;
-    requestid_t processed_requests = 0;
-    requestid_t produced_requests = 0;
-    requestid_t canceled_requests = 0;
-    double accumulatedRequestTime = 0.0;
-    double currentTime = 0.0;
-  };
-
-  struct ProgramConfiguration
-  {
-    deviceid_t producerCount;
-    deviceid_t deviceCount;
-    size_t bufferSize;
-    double simulationEnd;
-  } config{11, 10, 5, 100.0};
-
-  std::ostream &printState(std::ostream &out, const ProgramState &state);
-  ProgramState predictNextProgramState(const ProgramState &state);
-} // namespace course
 
 static void glfw_error_callback(int error, const char *description)
 {
@@ -81,6 +27,7 @@ void call_automatic_mode_layout(const course::ProgramState &state);
 void call_interactive_mode_layout(course::ProgramState &state);
 
 // NOTE: ONLY FOR NOW interactive mode option
+course::ProgramConfiguration config{11, 10, 5, 100.0};
 bool interactive_mode = true;
 size_t programFlowPos = 0;
 std::vector< course::ProgramState > programFlow;
@@ -205,149 +152,14 @@ int course::mainLogic(int argc, char **argv)
   return 0;
 }
 
-namespace course
-{
-  struct Event
-  {
-    double timestamp;
-    size_t position;
-
-    enum EventType
-    {
-      PRODUCTION,
-      COMPLETION,
-    } type;
-  };
-
-  ProgramState predictNextProgramState(const ProgramState &state)
-  {
-    auto newState{state};
-
-    // Determine closest special event
-    Event closestEvent = {state.producers[0].time(), 0, Event::PRODUCTION};
-    for (size_t i = 1; i < state.producers.size(); ++i)
-    {
-      const Producer &current = state.producers[i];
-      if (current.time() < closestEvent.timestamp)
-      {
-        closestEvent = {current.time(), i, Event::PRODUCTION};
-      }
-    }
-
-    for (size_t i = 0; i < state.devices.size(); ++i)
-    {
-      const Device &current = state.devices[i];
-      if (!current.empty() && current.time() < closestEvent.timestamp)
-      {
-        closestEvent = {current.time(), i, Event::COMPLETION};
-      }
-    }
-    newState.currentTime = closestEvent.timestamp;
-
-    if (closestEvent.type == Event::PRODUCTION)
-    {
-      auto &neededProducer = newState.producers[closestEvent.position];
-      SimpleRequest req = neededProducer.produceRequest();
-      newState.produced_requests += 1;
-
-      try
-      {
-        if (state.buffer.empty())
-        {
-          try
-          {
-            auto deviceIndex = course::chooseDeviceById(newState.devices);
-            Device &chosenDevice = newState.devices[deviceIndex];
-            chosenDevice.setRequest(req, req.time());
-          }
-          catch (const std::exception &e)
-          {
-            std::cerr << e.what() << '\n';
-            newState.buffer.tryAddRequest(req, chooseFirstEmptyBufferSpot);
-          }
-        }
-        else
-        {
-          newState.buffer.tryAddRequest(req, chooseFirstEmptyBufferSpot);
-        }
-      }
-      catch (const std::exception &e)
-      {
-        std::cerr << e.what() << '\n';
-        newState.canceled_requests += 1;
-      }
-    }
-    else if (closestEvent.type == Event::COMPLETION)
-    {
-      Device &chosenDevice = newState.devices[closestEvent.position];
-      newState.accumulatedRequestTime += (chosenDevice.time() - chosenDevice.currentRequest().time());
-      chosenDevice.finishProcessing();
-      newState.processed_requests += 1;
-
-      // NOTE: setRequest here works fine only if special events are prod, fin and simfin
-      try
-      {
-        SimpleRequest req;
-        newState.buffer.tryGetRequest(req, chooseRequestFromBufferByProducerNumber);
-        chosenDevice.setRequest(req);
-      }
-      catch (const std::exception &e)
-      {
-        std::cerr << e.what() << '\n';
-      }
-    }
-    return newState;
-  }
-
-  std::ostream &printState(std::ostream &out, const ProgramState &state)
-  {
-    // construct strings for output
-    std::string producers("P: ");
-    for (const Producer &p: state.producers)
-    {
-      try
-      {
-        producers += " " + std::to_string(p.requestCount());
-      }
-      catch (const std::bad_alloc &e)
-      {
-        std::cerr << e.what() << '\n';
-      }
-    }
-    producers += '\n';
-
-    std::string devices("D: ");
-    for (const Device &d: state.devices)
-    {
-      try
-      {
-        devices += " " + std::to_string(d.processedRequests());
-      }
-      catch (const std::bad_alloc &e)
-      {
-        std::cerr << e.what() << '\n';
-      }
-    }
-    devices += '\n';
-
-    // output results
-    out << producers << devices << "processed: " << state.processed_requests << '\n';
-    out << "produced: " << state.produced_requests << '\n' << "canceled: " << state.canceled_requests << '\n';
-    out << "current time: " << state.currentTime << '\n';
-    out << "accumulated time: " << state.accumulatedRequestTime << '\n';
-    return out;
-  }
-} // namespace course
-
 void call_interactive_mode_layout(course::ProgramState &state)
 {
-  ImGui::Begin("Interactive mode"); // Create a window called "Hello,
-                                    // world!" and append into it.
+  ImGui::Begin("Interactive mode");
 
   static ImGuiTableFlags flags =
       ImGuiTableFlags_Borders | ImGuiTableFlags_RowBg | ImGuiTableFlags_SizingStretchSame | ImGuiTableFlags_Resizable;
   ImGui::Text("Producers info"); // Display some text (you can
-  if (ImGui::BeginTable("producer", 4, flags))
+  if (ImGui::BeginTable("producer", 3, flags))
   {
     ImGui::TableSetupColumn("Name");
     ImGui::TableSetupColumn("Timestamp");
@@ -393,9 +205,32 @@ void call_interactive_mode_layout(course::ProgramState &state)
     }
     ImGui::EndTable();
   }
+  ImGui::Text("Buffer"); // Display some text (you can
+  if (ImGui::BeginTable("buffer", 3, flags))
+  {
+    ImGui::TableNextColumn();
+    ImGui::TableHeader("Slot id");
+    ImGui::TableNextColumn();
+    ImGui::TableHeader("Timestamp");
+    ImGui::TableNextColumn();
+    ImGui::TableHeader("Producer id");
+    const auto &buff = state.buffer;
+    for (size_t row = 0; row < buff.size(); row++)
+    {
+      ImGui::TableNextRow();
+      ImGui::TableNextColumn();
+      ImGui::Text("%ld", row);
+      ImGui::TableNextColumn();
+      ImGui::Text("%f", buff[row].time());
+      ImGui::TableNextColumn();
+      ImGui::Text("%d", buff[row].producerId());
+    }
+    ImGui::EndTable();
+  }
+
   if (ImGui::Button("Previous state"))
   {
-    circle_decrement(programFlowPos, 0, programFlow.size() - 1);
+    course::circle_decrement(programFlowPos, 0, programFlow.size() - 1);
     state = programFlow[programFlowPos];
   }
   ImGui::SameLine();
@@ -403,7 +238,7 @@ void call_interactive_mode_layout(course::ProgramState &state)
   ImGui::SameLine();
   if (ImGui::Button("Next state"))
   {
-    circle_increment(programFlowPos, 0, programFlow.size() - 1);
+    course::circle_increment(programFlowPos, 0, programFlow.size() - 1);
     state = programFlow[programFlowPos];
   }
   if (ImGui::Button("Finish simulation"))
