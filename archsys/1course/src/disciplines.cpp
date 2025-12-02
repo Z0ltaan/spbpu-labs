@@ -7,10 +7,10 @@
 
 course::deviceid_t course::chooseFirstEmptyBufferSpot(const Buffer &buff)
 {
-  size_t spotId = 0;
+  deviceid_t spotId = 0;
   for (; spotId < buff.size(); ++spotId)
   {
-    if (isEmpty(buff[spotId]))
+    if (buff[spotId].empty())
     {
       break;
     }
@@ -29,7 +29,7 @@ size_t course::chooseRequestFromBufferByProducerNumber(const Buffer &buff)
 
   for (size_t i = 0; i < buff.size(); ++i)
   {
-    if ((!isEmpty(buff[i]) && chosenRequest > buff[i]) || (!isEmpty(buff[i]) && isEmpty(chosenRequest)))
+    if ((!buff[i].empty() && chosenRequest > buff[i]) || (!buff[i].empty() && chosenRequest.empty()))
     {
       chosenRequest = buff[i];
       pos = i;

@@ -1,10 +1,14 @@
 #include "mainLogic.hpp"
 #include <algorithm>
 #include <cmath>
+#include <filesystem>
+#include <fstream>
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
+#include <iostream>
 #include <iterator>
+#include <stdexcept>
 #include <stdio.h>
 #include <vector>
 #include "buffer.hpp"
@@ -16,7 +20,7 @@
 #include "utils/idSetter.hpp"
 
 #define GL_SILENCE_DEPRECATION
-#include <GLFW/glfw3.h> // Will drag system OpenGL headers
+#include <GLFW/glfw3.h>
 
 static void glfw_error_callback(int error, const char *description)
 {
@@ -34,8 +38,58 @@ int course::mainLogic(int argc, char **argv)
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
   // NOTE: ONLY FOR NOW interactive mode option
-  course::ProgramConfiguration config{9, 3, 3, 60.0, 5.0, {2.0, 4.0}};
+  course::ProgramConfiguration config{0, 0, 0, 0.0, 0.0, {0.0, 1.0}};
   bool interactive_mode = true;
+
+  try
+  {
+    if (const std::filesystem::path programPath(argv[0]);
+        !std::filesystem::exists(programPath.parent_path() += "/configs"))
+    {
+      std::filesystem::create_directory(programPath.parent_path() += "/configs");
+    }
+    else
+    {
+      std::filesystem::path configPath(programPath.parent_path() += "/configs");
+
+      if (std::ifstream in(configPath.string() + "/program.txt"); in.is_open())
+      {
+        in >> config;
+        if (!in)
+        {
+          throw std::runtime_error("Bad program config");
+        }
+      }
+      else
+      {
+        throw std::runtime_error("Cannot open file program.txt");
+      }
+
+      if (std::ifstream in(configPath.string() + "/interactive_mode.txt"); in.is_open())
+      {
+        in >> interactive_mode;
+        if (!in)
+        {
+          throw std::runtime_error("Bad program mode");
+        }
+      }
+      else
+      {
+        throw std::runtime_error("Cannot open file interactive_mode.txt");
+      }
+    }
+
+    if (config.bufferSize == 0 || config.producerCount == 0 || config.deviceCount == 0)
+    {
+      throw std::runtime_error("Bad system specs in config or no configs at all");
+    }
+  }
+  catch (const std::runtime_error &e)
+  {
+    std::cerr << e.what() << '\n';
+    return -1;
+  }
+
   size_t programFlowPos = 0;
   std::vector< course::ProgramState > programFlow;
 
@@ -62,7 +116,7 @@ int course::mainLogic(int argc, char **argv)
   current_state = programFlow.front();
 
   // here goes gui or some other output
-  float main_scale = ImGui_ImplGlfw_GetContentScaleForMonitor(glfwGetPrimaryMonitor()); // Valid on GLFW 3.3+ only
+  float main_scale = ImGui_ImplGlfw_GetContentScaleForMonitor(glfwGetPrimaryMonitor());
   GLFWwindow *window =
       glfwCreateWindow((int) (1280 * main_scale), (int) (800 * main_scale), "Queueing system model", nullptr, nullptr);
   if (window == nullptr)
@@ -75,27 +129,21 @@ int course::mainLogic(int argc, char **argv)
   ImGui::CreateContext();
   ImGuiIO &io = ImGui::GetIO();
   (void) io;
-  io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
-  io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;  // Enable Gamepad Controls
+  io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+  io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
 
   // Setup Dear ImGui style
   ImGui::StyleColorsDark();
-  // ImGui::StyleColorsLight();
 
   // Setup scaling
   ImGuiStyle &style = ImGui::GetStyle();
-  style.ScaleAllSizes(main_scale); // Bake a fixed style scale. (until we have a solution for
-                                   // dynamic style scaling, changing this requires resetting
-                                   // Style + calling this again)
-  style.FontScaleDpi = main_scale; // Set initial font scale. (using io.ConfigDpiScaleFonts=true
-                                   // makes this unnecessary. We leave both here for
-                                   // documentation purpose)
+  style.ScaleAllSizes(main_scale);
+  style.FontScaleDpi = main_scale;
 
   // Setup Platform/Renderer backends
   ImGui_ImplGlfw_InitForOpenGL(window, true);
   ImGui_ImplOpenGL3_Init(glsl_version);
 
-  // Our state
   ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
   while (!glfwWindowShouldClose(window))

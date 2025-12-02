@@ -20,6 +20,7 @@ namespace course
     const data_t &data() const noexcept;
     deviceid_t producerId() const noexcept;
     requestid_t requestNumber() const noexcept;
+    bool empty() const noexcept;
     time_t time() const noexcept;
 
   private:
@@ -27,7 +28,6 @@ namespace course
     time_t produceTime_;
   };
 
-  bool isEmpty(const SimpleRequest &rhs);
   bool operator>(const SimpleRequest &lhs, const SimpleRequest &rhs);
   bool operator==(const SimpleRequest &lhs, const SimpleRequest &rhs);
 } // namespace course

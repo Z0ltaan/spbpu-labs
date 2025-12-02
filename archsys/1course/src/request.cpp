@@ -10,8 +10,7 @@ course::SimpleRequest::SimpleRequest(deviceid_t device, requestid_t request, tim
     requestData_(device, request), produceTime_(produceTime)
 {}
 
-bool course::isEmpty(const SimpleRequest &rhs) { return rhs.producerId() == EMPTY; }
-
+bool course::SimpleRequest::empty() const noexcept { return requestData_.first == EMPTY; }
 course::deviceid_t course::SimpleRequest::producerId() const noexcept { return requestData_.first; }
 
 course::requestid_t course::SimpleRequest::requestNumber() const noexcept { return requestData_.second; }

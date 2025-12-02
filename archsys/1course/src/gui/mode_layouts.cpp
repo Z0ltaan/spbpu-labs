@@ -23,8 +23,8 @@ void course::call_interactive_mode_layout(const course::ProgramState &state)
       ImGui::TableNextColumn();
       ImGui::Text("P%d", current.id());
       ImGui::TableNextColumn();
-      // ImGui::Text("%f", current.prevProductionTime());
-      ImGui::Text("%f", current.nextProductionTime());
+      ImGui::Text("%f", current.prevProductionTime());
+      // ImGui::Text("%f", current.nextProductionTime());
       ImGui::TableNextColumn();
       ImGui::Text("%ld", current.requestCount());
     }
@@ -49,8 +49,8 @@ void course::call_interactive_mode_layout(const course::ProgramState &state)
       ImGui::TableNextColumn();
       ImGui::Text("D%d", current.id()); // name
       ImGui::TableNextColumn();
-      ImGui::Text("%f", current.nextFinishTime());
-      // ImGui::Text("%f", current.currentRequest().time());
+      // ImGui::Text("%f", current.nextFinishTime());
+      ImGui::Text("%f", current.currentRequest().time());
       ImGui::TableNextColumn();
       ImGui::Text("%s", current.empty() ? "Free" : "Occupied");
       ImGui::TableNextColumn();
@@ -82,23 +82,6 @@ void course::call_interactive_mode_layout(const course::ProgramState &state)
   }
 }
 
-// double calculate_workload(const course::collection_t< course::Device > &devs,
-//                           const course::collection_t< course::Producer > &prods)
-// {
-//   double intsumdevs = 0.0;
-//   for (const auto &dev: devs)
-//   {
-//     intsumdevs += dev.processedRequests();
-//   }
-//
-//   double intsumprods = 0.0;
-//   for (const auto &prod: prods)
-//   {
-//     intsumprods += prod.requestCount();
-//   }
-//   return intsumprods / intsumdevs;
-// }
-
 void course::call_automatic_mode_layout(const course::ProgramState &state, const ProgramConfiguration &config)
 {
   if (ImGui::BeginTable("graphs", 8, ImGuiTableFlags_SizingStretchSame | ImGuiTableFlags_Resizable))
@@ -128,7 +111,6 @@ void course::call_automatic_mode_layout(const course::ProgramState &state, const
     ImGui::TableNextColumn();
     ImGui::Text("%f", double(state.accumulatedRequestTime) / double(state.processed_requests));
     ImGui::TableNextColumn();
-    // ImGui::Text("%f", calculate_workload(state.devices, state.producers));
     ImGui::Text("%f", double(state.produced_requests) / double(state.processed_requests));
     ImGui::EndTable();
   }

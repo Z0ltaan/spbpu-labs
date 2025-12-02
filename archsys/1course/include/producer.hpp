@@ -1,6 +1,8 @@
 #ifndef PRODUCER_HPP
 #define PRODUCER_HPP
 
+#include <ctime>
+#include <istream>
 #include <random>
 #include "priority.hpp"
 
@@ -29,6 +31,8 @@ namespace course
     std::mt19937 gen_;
     std::uniform_real_distribution< value_type > dist_;
   };
+
+  std::istream &operator>>(std::istream &in, UniformRandomGenerator::Bounds &bounds);
 
   // template < class Generator >
   class Producer

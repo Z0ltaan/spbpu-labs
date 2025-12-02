@@ -2,6 +2,28 @@
 #include <iostream>
 #include "disciplines.hpp"
 
+std::istream &course::operator>>(std::istream &in, ProgramConfiguration &config)
+{
+  std::istream::sentry guard(in);
+  if (!guard)
+  {
+    return in;
+  }
+
+  auto tmp = config;
+  in >> tmp.producerCount >> tmp.deviceCount >> tmp.bufferSize >> tmp.simulationEnd >> tmp.lambda >> tmp.bounds;
+
+  if (in)
+  {
+    config = tmp;
+  }
+  else
+  {
+    in.setstate(std::ios::failbit);
+  }
+
+  return in;
+}
 struct Event
 {
   double timestamp;

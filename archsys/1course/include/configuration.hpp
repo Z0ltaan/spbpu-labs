@@ -1,6 +1,7 @@
 #ifndef CONFIGURATION_HPP
 #define CONFIGURATION_HPP
 
+#include <istream>
 #include <vector>
 #include "buffer.hpp"
 #include "device.hpp"
@@ -29,6 +30,8 @@ namespace course
     double lambda;
     UniformRandomGenerator::Bounds bounds;
   };
+
+  std::istream &operator>>(std::istream &in, ProgramConfiguration &config);
 
   ProgramState predictNextProgramState(const ProgramState &state);
   std::ostream &printState(std::ostream &out, const ProgramState &state);
