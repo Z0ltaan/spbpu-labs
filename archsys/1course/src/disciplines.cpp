@@ -24,19 +24,19 @@ course::deviceid_t course::chooseFirstEmptyBufferSpot(const Buffer &buff)
 
 size_t course::chooseRequestFromBufferByProducerNumber(const Buffer &buff)
 {
-  SimpleRequest chosenRequest(buff.size(), 0);
+  SimpleRequest chosenRequest(EMPTY, 0);
   size_t pos = 0;
 
   for (size_t i = 0; i < buff.size(); ++i)
   {
-    if (!isEmpty(buff[i]) && chosenRequest > buff[i])
+    if ((!isEmpty(buff[i]) && chosenRequest > buff[i]) || (!isEmpty(buff[i]) && isEmpty(chosenRequest)))
     {
       chosenRequest = buff[i];
       pos = i;
     }
   }
 
-  if (chosenRequest == SimpleRequest(buff.size(), 0))
+  if (chosenRequest == SimpleRequest(EMPTY, 0))
   {
     throw std::runtime_error("No requests in buffer");
   }
@@ -46,7 +46,7 @@ size_t course::chooseRequestFromBufferByProducerNumber(const Buffer &buff)
 
 course::deviceid_t course::chooseDeviceById(const collection_t< Device > &collection)
 {
-  size_t deviceId = 0;
+  deviceid_t deviceId = 0;
   for (; deviceId < collection.size(); ++deviceId)
   {
     if (collection[deviceId].empty())

@@ -26,3 +26,5 @@ target_include_directories(
   ${PROJECT_NAME}
   PUBLIC ${CMAKE_HOME_DIRECTORY}/include
   PUBLIC ${CMAKE_HOME_DIRECTORY}/imgui)
+
+add_dependencies(${PROJECT_NAME} copy_compile_commands)
