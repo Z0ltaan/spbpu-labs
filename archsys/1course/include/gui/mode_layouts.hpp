@@ -5,7 +5,7 @@
 
 namespace course
 {
-  void call_automatic_mode_layout(const ProgramState &state);
+  void call_automatic_mode_layout(const ProgramState &state, const ProgramConfiguration &config);
   void call_interactive_mode_layout(const ProgramState &state);
 
 } // namespace course

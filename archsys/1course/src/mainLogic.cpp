@@ -34,7 +34,7 @@ int course::mainLogic(int argc, char **argv)
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
   // NOTE: ONLY FOR NOW interactive mode option
-  course::ProgramConfiguration config{11, 10, 5, 100.0};
+  course::ProgramConfiguration config{9, 3, 3, 60.0, 5.0, {2.0, 4.0}};
   bool interactive_mode = true;
   size_t programFlowPos = 0;
   std::vector< course::ProgramState > programFlow;
@@ -43,13 +43,11 @@ int course::mainLogic(int argc, char **argv)
   ProgramState current_state{std::vector< Producer >(), std::vector< Device >(), Buffer(config.bufferSize)};
 
   {
-    UniformRandomGenerator prodgen(UniformRandomGenerator::Bounds{2.0, 5.0});
     std::generate_n(std::back_insert_iterator(current_state.producers), config.producerCount,
-                    [&] { return Producer(prodgen); });
+                    [&] { return Producer(UniformRandomGenerator(config.bounds)); });
 
-    ExponentialRandomGenerator devgen(7.0);
     std::generate_n(std::back_insert_iterator(current_state.devices), config.deviceCount,
-                    [&] { return Device(devgen); });
+                    [&] { return Device(ExponentialRandomGenerator(config.lambda)); });
   }
 
   std::for_each(current_state.producers.begin(), current_state.producers.end(), course::IdSetter< course::Producer >());
@@ -62,6 +60,7 @@ int course::mainLogic(int argc, char **argv)
   }
   programFlow.push_back(current_state);
   current_state = programFlow.front();
+
   // here goes gui or some other output
   float main_scale = ImGui_ImplGlfw_GetContentScaleForMonitor(glfwGetPrimaryMonitor()); // Valid on GLFW 3.3+ only
   GLFWwindow *window =
@@ -97,9 +96,6 @@ int course::mainLogic(int argc, char **argv)
   ImGui_ImplOpenGL3_Init(glsl_version);
 
   // Our state
-  bool show_demo_window = true;
-  bool show_another_window = false;
-  bool show_main_window = true;
   ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
   while (!glfwWindowShouldClose(window))
@@ -124,6 +120,7 @@ int course::mainLogic(int argc, char **argv)
       course::call_interactive_mode_layout(current_state);
 
       // add some interaction with content
+      ImGui::Text("Current timestamp: %f ", current_state.currentTime);
       if (ImGui::Button("Previous state"))
       {
         course::circle_decrement(programFlowPos, 0, programFlow.size() - 1);
@@ -147,7 +144,7 @@ int course::mainLogic(int argc, char **argv)
     {
       ImGui::Begin("Automatic mode");
 
-      course::call_automatic_mode_layout(current_state);
+      course::call_automatic_mode_layout(programFlow.back(), config);
 
       ImGui::End();
     }

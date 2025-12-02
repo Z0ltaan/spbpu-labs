@@ -2,11 +2,11 @@
 #include "priority.hpp"
 #include "request.hpp"
 
-course::Device::Device(generator_t gen) :
+course::Device::Device(const generator_t &gen) :
     deviceId_(0), processedRequestsCount_(0), currentRequest_(), nextProcessingFinish_(0.0), gen_(gen)
 {}
 
-course::Device::Device(deviceid_t id, generator_t gen) :
+course::Device::Device(deviceid_t id, const generator_t &gen) :
     deviceId_(id), processedRequestsCount_(0), currentRequest_(), nextProcessingFinish_(0.0), gen_(gen)
 {}
 
@@ -21,7 +21,7 @@ void course::Device::setRequest(const SimpleRequest &rhs, time_t start) noexcept
   currentRequest_ = rhs;
   if (!isEmpty(rhs))
   {
-    time_t startTime = (start == 0.0 ? time() : start);
+    time_t startTime = (start == 0.0 ? nextFinishTime() : start);
     setNextProcessingFinish(startTime + getNextProcessingTime());
   }
 }
@@ -32,8 +32,8 @@ void course::Device::finishProcessing()
   setRequest(SimpleRequest());
 }
 
-course::Device::time_t course::Device::time() const noexcept { return nextProcessingFinish_; }
+course::Device::time_t course::Device::nextFinishTime() const noexcept { return nextProcessingFinish_; }
 
-course::SimpleRequest course::Device::currentRequest() const noexcept { return currentRequest_; }
+const course::SimpleRequest &course::Device::currentRequest() const noexcept { return currentRequest_; }
 
 bool course::Device::empty() const noexcept { return isEmpty(currentRequest_); }

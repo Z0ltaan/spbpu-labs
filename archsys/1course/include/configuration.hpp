@@ -26,6 +26,8 @@ namespace course
     deviceid_t deviceCount;
     size_t bufferSize;
     double simulationEnd;
+    double lambda;
+    UniformRandomGenerator::Bounds bounds;
   };
 
   ProgramState predictNextProgramState(const ProgramState &state);

@@ -19,11 +19,9 @@ namespace course
       value_type max;
     };
 
-    explicit UniformRandomGenerator(Bounds bounds = {0, 1}) :
-        gen_(std::random_device{}()), dist_(bounds.min, bounds.max)
-    {}
+    explicit UniformRandomGenerator(Bounds bounds) : gen_(std::random_device{}()), dist_(bounds.min, bounds.max) {}
 
-    UniformRandomGenerator(size_t seed, Bounds bounds = {0, 1}) : gen_(seed), dist_(bounds.min, bounds.max) {}
+    UniformRandomGenerator(size_t seed, Bounds bounds) : gen_(seed), dist_(bounds.min, bounds.max) {}
 
     value_type operator()() { return dist_(gen_); }
 
@@ -39,17 +37,19 @@ namespace course
     using time_t = double;
     using generator_t = UniformRandomGenerator;
 
-    explicit Producer(generator_t = generator_t());
-    Producer(deviceid_t id, generator_t = generator_t());
+    explicit Producer(const generator_t &gen);
+    Producer(deviceid_t id, const generator_t &gen);
     SimpleRequest produceRequest();
     void setId(deviceid_t rhs);
     deviceid_t id() const noexcept;
     requestid_t requestCount() const noexcept;
-    time_t time() const noexcept;
+    time_t prevProductionTime() const noexcept;
+    time_t nextProductionTime() const noexcept;
 
   private:
     deviceid_t producerId_;
     requestid_t requestCount_;
+    time_t prevProductionTime_;
     time_t nextProductionTime_;
     generator_t gen_;
 

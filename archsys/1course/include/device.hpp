@@ -12,9 +12,9 @@ namespace course
   public:
     using value_type = double;
 
-    explicit ExponentialRandomGenerator(value_type lambda = 1.0) : gen_(std::random_device{}()), dist_(lambda) {}
+    explicit ExponentialRandomGenerator(value_type lambda = 1.0) : gen_(std::random_device{}()), dist_(1.0 / lambda) {}
 
-    ExponentialRandomGenerator(size_t seed, value_type lambda = 1.0) : gen_(seed), dist_(lambda) {}
+    ExponentialRandomGenerator(size_t seed, value_type lambda = 1.0) : gen_(seed), dist_(1.0 / lambda) {}
 
     value_type operator()() { return dist_(gen_); }
 
@@ -29,16 +29,16 @@ namespace course
     using time_t = double;
     using generator_t = ExponentialRandomGenerator;
 
-    explicit Device(generator_t gen = generator_t());
-    Device(deviceid_t id, generator_t gen = generator_t());
+    explicit Device(const generator_t &gen);
+    Device(deviceid_t id, const generator_t &gen);
 
     deviceid_t id() const noexcept;
     requestid_t processedRequests() const noexcept;
     void setId(deviceid_t id);
     void setRequest(const SimpleRequest &rhs, time_t start = 0.0) noexcept;
     void finishProcessing();
-    time_t time() const noexcept;
-    SimpleRequest currentRequest() const noexcept;
+    time_t nextFinishTime() const noexcept;
+    const SimpleRequest &currentRequest() const noexcept;
     bool empty() const noexcept;
 
   private:

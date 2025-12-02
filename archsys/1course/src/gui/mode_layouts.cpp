@@ -1,5 +1,8 @@
 #include "gui/mode_layouts.hpp"
 #include <imgui.h>
+#include "configuration.hpp"
+#include "disciplines.hpp"
+#include "producer.hpp"
 
 void course::call_interactive_mode_layout(const course::ProgramState &state)
 {
@@ -20,7 +23,8 @@ void course::call_interactive_mode_layout(const course::ProgramState &state)
       ImGui::TableNextColumn();
       ImGui::Text("P%d", current.id());
       ImGui::TableNextColumn();
-      ImGui::Text("%f", current.time());
+      // ImGui::Text("%f", current.prevProductionTime());
+      ImGui::Text("%f", current.nextProductionTime());
       ImGui::TableNextColumn();
       ImGui::Text("%ld", current.requestCount());
     }
@@ -45,7 +49,8 @@ void course::call_interactive_mode_layout(const course::ProgramState &state)
       ImGui::TableNextColumn();
       ImGui::Text("D%d", current.id()); // name
       ImGui::TableNextColumn();
-      ImGui::Text("%f", current.time());
+      ImGui::Text("%f", current.nextFinishTime());
+      // ImGui::Text("%f", current.currentRequest().time());
       ImGui::TableNextColumn();
       ImGui::Text("%s", current.empty() ? "Free" : "Occupied");
       ImGui::TableNextColumn();
@@ -77,14 +82,30 @@ void course::call_interactive_mode_layout(const course::ProgramState &state)
   }
 }
 
-void course::call_automatic_mode_layout(const course::ProgramState &state)
-{
+// double calculate_workload(const course::collection_t< course::Device > &devs,
+//                           const course::collection_t< course::Producer > &prods)
+// {
+//   double intsumdevs = 0.0;
+//   for (const auto &dev: devs)
+//   {
+//     intsumdevs += dev.processedRequests();
+//   }
+//
+//   double intsumprods = 0.0;
+//   for (const auto &prod: prods)
+//   {
+//     intsumprods += prod.requestCount();
+//   }
+//   return intsumprods / intsumdevs;
+// }
 
+void course::call_automatic_mode_layout(const course::ProgramState &state, const ProgramConfiguration &config)
+{
   if (ImGui::BeginTable("graphs", 8, ImGuiTableFlags_SizingStretchSame | ImGuiTableFlags_Resizable))
   {
     ImGui::TableSetupColumn("Producer count");
     ImGui::TableSetupColumn("Device count");
-    ImGui::TableSetupColumn("Prod bounds");
+    ImGui::TableSetupColumn("Production intensity");
     ImGui::TableSetupColumn("Exp dist lamdba");
     ImGui::TableSetupColumn("Buffer size");
     ImGui::TableSetupColumn("P canc");
@@ -97,9 +118,9 @@ void course::call_automatic_mode_layout(const course::ProgramState &state)
     ImGui::TableNextColumn();
     ImGui::Text("%ld", state.devices.size());
     ImGui::TableNextColumn();
-    ImGui::Text("{ %f , %f }", 2.0, 5.0);
+    ImGui::Text("%f", (config.bounds.max + config.bounds.min) / 2.0);
     ImGui::TableNextColumn();
-    ImGui::Text("%f", 7.0);
+    ImGui::Text("%f", config.lambda);
     ImGui::TableNextColumn();
     ImGui::Text("%ld", state.buffer.size());
     ImGui::TableNextColumn();
@@ -107,7 +128,8 @@ void course::call_automatic_mode_layout(const course::ProgramState &state)
     ImGui::TableNextColumn();
     ImGui::Text("%f", double(state.accumulatedRequestTime) / double(state.processed_requests));
     ImGui::TableNextColumn();
-    ImGui::Text("%f", 3.5 / 7.0);
+    // ImGui::Text("%f", calculate_workload(state.devices, state.producers));
+    ImGui::Text("%f", double(state.produced_requests) / double(state.processed_requests));
     ImGui::EndTable();
   }
 }

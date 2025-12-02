@@ -19,22 +19,22 @@ course::ProgramState course::predictNextProgramState(const ProgramState &state)
   auto newState{state};
 
   // Determine closest special event
-  Event closestEvent = {state.producers[0].time(), 0, Event::PRODUCTION};
+  Event closestEvent = {state.producers[0].nextProductionTime(), 0, Event::PRODUCTION};
   for (size_t i = 1; i < state.producers.size(); ++i)
   {
     const Producer &current = state.producers[i];
-    if (current.time() < closestEvent.timestamp)
+    if (current.nextProductionTime() < closestEvent.timestamp)
     {
-      closestEvent = {current.time(), i, Event::PRODUCTION};
+      closestEvent = {current.nextProductionTime(), i, Event::PRODUCTION};
     }
   }
 
   for (size_t i = 0; i < state.devices.size(); ++i)
   {
     const Device &current = state.devices[i];
-    if (!current.empty() && current.time() < closestEvent.timestamp)
+    if (!current.empty() && current.nextFinishTime() < closestEvent.timestamp)
     {
-      closestEvent = {current.time(), i, Event::COMPLETION};
+      closestEvent = {current.nextFinishTime(), i, Event::COMPLETION};
     }
   }
   newState.currentTime = closestEvent.timestamp;
@@ -75,13 +75,16 @@ course::ProgramState course::predictNextProgramState(const ProgramState &state)
   else if (closestEvent.type == Event::COMPLETION)
   {
     Device &chosenDevice = newState.devices[closestEvent.position];
-    newState.accumulatedRequestTime += (chosenDevice.time() - chosenDevice.currentRequest().time());
+    newState.accumulatedRequestTime += (chosenDevice.nextFinishTime() - chosenDevice.currentRequest().time());
     chosenDevice.finishProcessing();
     newState.processed_requests += 1;
 
-    // NOTE: setRequest here works fine only if special events are prod, fin and simfin
+    // if (!state.buffer.empty())
+    // {
     try
     {
+      auto deviceIndex = course::chooseDeviceById(newState.devices);
+      chosenDevice = newState.devices[deviceIndex];
       SimpleRequest req;
       newState.buffer.tryGetRequest(req, chooseRequestFromBufferByProducerNumber);
       chosenDevice.setRequest(req);
@@ -90,6 +93,7 @@ course::ProgramState course::predictNextProgramState(const ProgramState &state)
     {
       std::cerr << e.what() << '\n';
     }
+    // }
   }
   return newState;
 }

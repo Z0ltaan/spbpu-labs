@@ -67,7 +67,7 @@ namespace course
 
     size_t contained() const noexcept { return currentlyContained_; }
 
-    bool isFull() const noexcept { return currentlyContained_ == size(); }
+    bool full() const noexcept { return currentlyContained_ == size(); }
 
     bool empty() const noexcept { return currentlyContained_ == 0; }
 
