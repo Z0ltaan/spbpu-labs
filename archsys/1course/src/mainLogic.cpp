@@ -90,6 +90,7 @@ int course::mainLogic(int argc, char **argv)
     return -1;
   }
 
+  // define program flow
   size_t programFlowPos = 0;
   std::vector< course::ProgramState > programFlow;
 
@@ -107,6 +108,7 @@ int course::mainLogic(int argc, char **argv)
   std::for_each(current_state.producers.begin(), current_state.producers.end(), course::IdSetter< course::Producer >());
   std::for_each(current_state.devices.begin(), current_state.devices.end(), course::IdSetter< course::Device >());
 
+  // simulate program flow
   while (current_state.currentTime < config.simulationEnd)
   {
     programFlow.push_back(current_state);

@@ -23,8 +23,8 @@ void course::call_interactive_mode_layout(const course::ProgramState &state)
       ImGui::TableNextColumn();
       ImGui::Text("P%d", current.id());
       ImGui::TableNextColumn();
-      ImGui::Text("%f", current.prevProductionTime());
-      // ImGui::Text("%f", current.nextProductionTime());
+      // ImGui::Text("%f", current.prevProductionTime());
+      ImGui::Text("%f", current.nextProductionTime());
       ImGui::TableNextColumn();
       ImGui::Text("%ld", current.requestCount());
     }
@@ -49,8 +49,8 @@ void course::call_interactive_mode_layout(const course::ProgramState &state)
       ImGui::TableNextColumn();
       ImGui::Text("D%d", current.id()); // name
       ImGui::TableNextColumn();
-      // ImGui::Text("%f", current.nextFinishTime());
-      ImGui::Text("%f", current.currentRequest().time());
+      ImGui::Text("%f", current.nextFinishTime());
+      // ImGui::Text("%f", current.currentRequest().time());
       ImGui::TableNextColumn();
       ImGui::Text("%s", current.empty() ? "Free" : "Occupied");
       ImGui::TableNextColumn();
