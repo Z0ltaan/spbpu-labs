@@ -15,3 +15,15 @@ target_include_directories(
   PUBLIC ${CMAKE_HOME_DIRECTORY}/imgui/
   PUBLIC ${CMAKE_HOME_DIRECTORY}/include/)
 target_link_libraries(${PROJECT_NAME} PUBLIC OpenGL::GL glfw3 libpqxx::pqxx)
+
+if(CMAKE_EXPORT_COMPILE_COMMANDS)
+  add_custom_target(
+    copy_compile_commands
+    COMMAND
+      ${CMAKE_COMMAND} -E copy_if_different
+      ${CMAKE_BINARY_DIR}/compile_commands.json
+      ${CMAKE_SOURCE_DIR}/compile_commands.json
+    COMMENT "Copying compile_commands.json to ${CMAKE_SOURCE_DIR}")
+
+  add_dependencies(${PROJECT_NAME} copy_compile_commands)
+endif()

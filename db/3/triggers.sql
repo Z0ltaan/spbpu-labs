@@ -10,7 +10,6 @@ BEGIN
 END;
 $$;
 
-
 CREATE OR REPLACE TRIGGER forbid_non_unique_car_numbers BEFORE INSERT ON cars FOR EACH ROW EXECUTE FUNCTION check_if_num_is_unique();
 
 -- kkk

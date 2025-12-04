@@ -13,6 +13,18 @@
 },
 {
   "directory": "/home/georv/work/spbpu-labs/db/course/build",
+  "command": "/usr/bin/c++  -I/home/georv/work/spbpu-labs/db/course/imgui -I/home/georv/work/spbpu-labs/db/course/include -isystem /home/georv/repos-not-mine/built/include  -o CMakeFiles/dbcourse.dir/src/read_config.cpp.o -c /home/georv/work/spbpu-labs/db/course/src/read_config.cpp",
+  "file": "/home/georv/work/spbpu-labs/db/course/src/read_config.cpp",
+  "output": "CMakeFiles/dbcourse.dir/src/read_config.cpp.o"
+},
+{
+  "directory": "/home/georv/work/spbpu-labs/db/course/build",
+  "command": "/usr/bin/c++  -I/home/georv/work/spbpu-labs/db/course/imgui -I/home/georv/work/spbpu-labs/db/course/include -isystem /home/georv/repos-not-mine/built/include  -o CMakeFiles/dbcourse.dir/src/utils/query.cpp.o -c /home/georv/work/spbpu-labs/db/course/src/utils/query.cpp",
+  "file": "/home/georv/work/spbpu-labs/db/course/src/utils/query.cpp",
+  "output": "CMakeFiles/dbcourse.dir/src/utils/query.cpp.o"
+},
+{
+  "directory": "/home/georv/work/spbpu-labs/db/course/build",
   "command": "/usr/bin/c++  -I/home/georv/work/spbpu-labs/db/course/imgui -I/home/georv/work/spbpu-labs/db/course/include -isystem /home/georv/repos-not-mine/built/include  -o CMakeFiles/dbcourse.dir/imgui/imgui.cpp.o -c /home/georv/work/spbpu-labs/db/course/imgui/imgui.cpp",
   "file": "/home/georv/work/spbpu-labs/db/course/imgui/imgui.cpp",
   "output": "CMakeFiles/dbcourse.dir/imgui/imgui.cpp.o"
