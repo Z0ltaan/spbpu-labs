@@ -1,6 +1,18 @@
 [
 {
   "directory": "/home/georv/work/spbpu-labs/db/course/build",
+  "command": "/usr/bin/c++  -I/home/georv/work/spbpu-labs/db/course/imgui -I/home/georv/work/spbpu-labs/db/course/include -isystem /home/georv/repos-not-mine/built/include  -o CMakeFiles/dbcourse.dir/src/assign_work.cpp.o -c /home/georv/work/spbpu-labs/db/course/src/assign_work.cpp",
+  "file": "/home/georv/work/spbpu-labs/db/course/src/assign_work.cpp",
+  "output": "CMakeFiles/dbcourse.dir/src/assign_work.cpp.o"
+},
+{
+  "directory": "/home/georv/work/spbpu-labs/db/course/build",
+  "command": "/usr/bin/c++  -I/home/georv/work/spbpu-labs/db/course/imgui -I/home/georv/work/spbpu-labs/db/course/include -isystem /home/georv/repos-not-mine/built/include  -o CMakeFiles/dbcourse.dir/src/gui/clickable_table.cpp.o -c /home/georv/work/spbpu-labs/db/course/src/gui/clickable_table.cpp",
+  "file": "/home/georv/work/spbpu-labs/db/course/src/gui/clickable_table.cpp",
+  "output": "CMakeFiles/dbcourse.dir/src/gui/clickable_table.cpp.o"
+},
+{
+  "directory": "/home/georv/work/spbpu-labs/db/course/build",
   "command": "/usr/bin/c++  -I/home/georv/work/spbpu-labs/db/course/imgui -I/home/georv/work/spbpu-labs/db/course/include -isystem /home/georv/repos-not-mine/built/include  -o CMakeFiles/dbcourse.dir/src/main.cpp.o -c /home/georv/work/spbpu-labs/db/course/src/main.cpp",
   "file": "/home/georv/work/spbpu-labs/db/course/src/main.cpp",
   "output": "CMakeFiles/dbcourse.dir/src/main.cpp.o"
@@ -16,6 +28,12 @@
   "command": "/usr/bin/c++  -I/home/georv/work/spbpu-labs/db/course/imgui -I/home/georv/work/spbpu-labs/db/course/include -isystem /home/georv/repos-not-mine/built/include  -o CMakeFiles/dbcourse.dir/src/read_config.cpp.o -c /home/georv/work/spbpu-labs/db/course/src/read_config.cpp",
   "file": "/home/georv/work/spbpu-labs/db/course/src/read_config.cpp",
   "output": "CMakeFiles/dbcourse.dir/src/read_config.cpp.o"
+},
+{
+  "directory": "/home/georv/work/spbpu-labs/db/course/build",
+  "command": "/usr/bin/c++  -I/home/georv/work/spbpu-labs/db/course/imgui -I/home/georv/work/spbpu-labs/db/course/include -isystem /home/georv/repos-not-mine/built/include  -o CMakeFiles/dbcourse.dir/src/table_operations.cpp.o -c /home/georv/work/spbpu-labs/db/course/src/table_operations.cpp",
+  "file": "/home/georv/work/spbpu-labs/db/course/src/table_operations.cpp",
+  "output": "CMakeFiles/dbcourse.dir/src/table_operations.cpp.o"
 },
 {
   "directory": "/home/georv/work/spbpu-labs/db/course/build",

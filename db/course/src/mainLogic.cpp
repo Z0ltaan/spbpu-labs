@@ -1,41 +1,25 @@
 #include "mainLogic.hpp"
-#include "read_config.hpp"
-#include "utils/query.hpp"
+#include <imgui.h>
+#include <imgui_impl_glfw.h>
+#include <imgui_impl_opengl3.h>
 #include <iostream>
 #include <pqxx/pqxx>
+
 #include <string>
+#include "assign_work.hpp"
+#include "gui/clickable_table.hpp"
+#include "read_config.hpp"
+#include "table_operations.hpp"
+#include "utils/query.hpp"
 
-namespace course {
-void insert_into(pqxx::connection &c, const std::string &table_name,
-                 const std::string &colomns, const std::string &values) {
-  std::string final_query("insert into " + table_name + " " + colomns +
-                          " values " + values);
-  pqxx::result res = query(c, final_query, {});
-}
+#define GL_SILENCE_DEPRECATION
+#include <GLFW/glfw3.h>
 
-void delete_from(pqxx::connection &c, const std::string &table_name,
-                 const std::string &where_cond) {
-  std::string final_query("delete from " + table_name + " where " + where_cond);
-  pqxx::result res = query(c, final_query, {});
-}
-
-void update_table(pqxx::connection &c, const std::string &table_name,
-                  const std::string &column, const std::string &new_value,
-                  const std::string &where_cond) {
-  std::string final_query("update " + table_name + " set " + column + '=' +
-                          new_value + " where " + where_cond);
-}
-
-void assign_work(pqxx::connection &c, const std::string &master,
-                 const std::string &service, const std::string &car,
-                 const std::string &date) {
-  insert_into(c, "works", "(master_id, service_id, car_id, date_work)",
-              '(' + master + ',' + service + ',' + car + ", '" + date + "')");
-}
-} // namespace course
-
-int course::mainLogic(int argc, char **argv) {
-  if (argc != 2) {
+int
+course::mainLogic(int argc, char** argv)
+{
+  if (argc != 2)
+  {
     std::cerr << "Usage: <program name> <config path>\n";
     return -1;
   }
@@ -43,7 +27,8 @@ int course::mainLogic(int argc, char **argv) {
   using query_res_t = pqxx::result;
   using row_t = pqxx::row;
 
-  try {
+  try
+  {
     // NOTE: create connection to database
     std::string connection_options;
     read_config(connection_options, argv[1]);
@@ -59,16 +44,18 @@ int course::mainLogic(int argc, char **argv) {
     delete_from(connection, "masters", "name='van'");
     insert_into(connection, "masters", "(name)", "('van')");
     query_res_t res =
-        query(connection, "SELECT * from masters where name = 'van'", {});
+      query(connection, "SELECT * from masters where name = 'van'", {});
 
     assign_work(connection, "11", "1", "1", "2020-04-12");
 
-    for (const auto &row : res) {
-      auto [id, name] = row.as<int, std::string>();
+    for (const auto& row: res)
+    {
+      auto [id, name] = row.as< int, std::string >();
       std::cout << id << ' ' << name << '\n';
     }
-
-  } catch (const std::exception &e) {
+  }
+  catch (const std::exception& e)
+  {
     std::cerr << e.what() << "\n";
   }
   return 0;
