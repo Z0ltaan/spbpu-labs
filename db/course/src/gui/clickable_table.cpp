@@ -28,13 +28,15 @@ course::place_clickable_table(pqxx::connection& c,
 
   if (ImGui::BeginTable(table_name.c_str(), column_names.size()))
   {
+    // set column names of the table
     for (const auto& name: column_names)
     {
       ImGui::TableSetupColumn(name.c_str());
     }
     ImGui::TableHeadersRow();
 
-    auto table_rows = query(c, "SELECT * FROM $1", { table_name });
+    // retrieve row data
+    auto table_rows = query(c, "SELECT * FROM " + table_name, {});
     for (const auto& row: table_rows)
     {
       ImGui::TableNextRow();

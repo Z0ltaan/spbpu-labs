@@ -5,6 +5,7 @@
 #include <iostream>
 #include <pqxx/pqxx>
 
+#include <stdexcept>
 #include <string>
 #include "assign_work.hpp"
 #include "gui/clickable_table.hpp"
@@ -15,6 +16,12 @@
 #define GL_SILENCE_DEPRECATION
 #include <GLFW/glfw3.h>
 
+static void
+glfw_error_callback(int error, const char* description)
+{
+  fprintf(stderr, "GLFW Error %d: %s\n", error, description);
+}
+
 int
 course::mainLogic(int argc, char** argv)
 {
@@ -24,9 +31,21 @@ course::mainLogic(int argc, char** argv)
     return -1;
   }
 
+  glfwSetErrorCallback(glfw_error_callback);
+  if (!glfwInit())
+    return 1;
+
+  const char* glsl_version = "#version 330";
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+
+  float main_scale =
+    ImGui_ImplGlfw_GetContentScaleForMonitor(glfwGetPrimaryMonitor());
+
   using query_res_t = pqxx::result;
   using row_t = pqxx::row;
 
+  GLFWwindow* window = nullptr;
   try
   {
     // NOTE: create connection to database
@@ -35,28 +54,112 @@ course::mainLogic(int argc, char** argv)
     pqxx::connection connection(connection_options);
     std::cout << "Connected to " << connection.dbname() << '\n';
 
+    window = glfwCreateWindow((int) (1280 * main_scale),
+                              (int) (800 * main_scale),
+                              "Car center helper",
+                              nullptr,
+                              nullptr);
+    if (!window)
+      throw std::runtime_error("Could not create a window");
+
+    glfwMakeContextCurrent(window);
+    glfwSwapInterval(1); // Enable vsync
+    // Setup Dear ImGui context
+    IMGUI_CHECKVERSION();
+    ImGui::CreateContext();
+    ImGuiIO& io = ImGui::GetIO();
+    (void) io;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+
+    // Setup Dear ImGui style
+    ImGui::StyleColorsDark();
+
+    // Setup scaling
+    ImGuiStyle& style = ImGui::GetStyle();
+    style.ScaleAllSizes(main_scale);
+    style.FontScaleDpi = main_scale;
+
+    // Setup Platform/Renderer backends
+    ImGui_ImplGlfw_InitForOpenGL(window, true);
+    ImGui_ImplOpenGL3_Init(glsl_version);
+
+    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+
+    while (!glfwWindowShouldClose(window))
+    {
+      glfwPollEvents();
+      if (glfwGetWindowAttrib(window, GLFW_ICONIFIED) != 0)
+      {
+        ImGui_ImplGlfw_Sleep(10);
+        continue;
+      }
+
+      // Start the Dear ImGui frame
+      ImGui_ImplOpenGL3_NewFrame();
+      ImGui_ImplGlfw_NewFrame();
+      ImGui::NewFrame();
+
+      ImGuiWindowFlags main_window_flags =
+        ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
+        ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoCollapse;
+      // ImGuiWindowFlags_NoBackground;
+      bool* open_indicator = nullptr;
+
+      ImGui::SetNextWindowSize(io.DisplaySize);
+      ImGui::SetNextWindowPos(ImVec2{ 0, 0 });
+
+      // Create new window
+      ImGui::Begin("MainWindow", open_indicator, main_window_flags);
+
+      course::place_clickable_table(connection, "public", "services");
+
+      ImGui::End();
+
+      // Rendering
+      ImGui::Render();
+      int display_w, display_h;
+      glfwGetFramebufferSize(window, &display_w, &display_h);
+      glViewport(0, 0, display_w, display_h);
+      glClearColor(clear_color.x * clear_color.w,
+                   clear_color.y * clear_color.w,
+                   clear_color.z * clear_color.w,
+                   clear_color.w);
+      glClear(GL_COLOR_BUFFER_BIT);
+      ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+      glfwSwapBuffers(window);
+    }
+
     // pqxx::result res = query(connection, "call get_scores_table($1)", {2});
     // auto arr_entry = res.front().front().as_sql_array<std::string>();
 
     // pqxx::result res = query(connection, "call sum_up_costs($1)",
     // {"10months"}); auto arr_entry = res.front().front().as<int>();
     // std::cout << arr_entry << '\n';
-    delete_from(connection, "masters", "name='van'");
-    insert_into(connection, "masters", "(name)", "('van')");
-    query_res_t res =
-      query(connection, "SELECT * from masters where name = 'van'", {});
-
-    assign_work(connection, "11", "1", "1", "2020-04-12");
-
-    for (const auto& row: res)
-    {
-      auto [id, name] = row.as< int, std::string >();
-      std::cout << id << ' ' << name << '\n';
-    }
+    // delete_from(connection, "masters", "name='van'");
+    // insert_into(connection, "masters", "(name)", "('van')");
+    // query_res_t res =
+    //   query(connection, "SELECT * from masters where name = 'van'", {});
+    //
+    // assign_work(connection, "11", "1", "1", "2020-04-12");
+    //
+    // for (const auto& row: res)
+    // {
+    //   auto [id, name] = row.as< int, std::string >();
+    //   std::cout << id << ' ' << name << '\n';
+    // }
   }
   catch (const std::exception& e)
   {
     std::cerr << e.what() << "\n";
   }
+
+  ImGui_ImplOpenGL3_Shutdown();
+  ImGui_ImplGlfw_Shutdown();
+  ImGui::DestroyContext();
+
+  glfwDestroyWindow(window);
+  glfwTerminate();
   return 0;
 }
