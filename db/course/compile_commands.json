@@ -13,6 +13,12 @@
 },
 {
   "directory": "/home/georv/work/spbpu-labs/db/course/build",
+  "command": "/usr/bin/c++  -I/home/georv/work/spbpu-labs/db/course/imgui -I/home/georv/work/spbpu-labs/db/course/include -isystem /home/georv/repos-not-mine/built/include  -o CMakeFiles/dbcourse.dir/src/gui/table_interaction.cpp.o -c /home/georv/work/spbpu-labs/db/course/src/gui/table_interaction.cpp",
+  "file": "/home/georv/work/spbpu-labs/db/course/src/gui/table_interaction.cpp",
+  "output": "CMakeFiles/dbcourse.dir/src/gui/table_interaction.cpp.o"
+},
+{
+  "directory": "/home/georv/work/spbpu-labs/db/course/build",
   "command": "/usr/bin/c++  -I/home/georv/work/spbpu-labs/db/course/imgui -I/home/georv/work/spbpu-labs/db/course/include -isystem /home/georv/repos-not-mine/built/include  -o CMakeFiles/dbcourse.dir/src/main.cpp.o -c /home/georv/work/spbpu-labs/db/course/src/main.cpp",
   "file": "/home/georv/work/spbpu-labs/db/course/src/main.cpp",
   "output": "CMakeFiles/dbcourse.dir/src/main.cpp.o"

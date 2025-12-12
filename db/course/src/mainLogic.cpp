@@ -7,8 +7,10 @@
 
 #include <stdexcept>
 #include <string>
+#include <vector>
 #include "assign_work.hpp"
 #include "gui/clickable_table.hpp"
+#include "gui/table_interaction.hpp"
 #include "read_config.hpp"
 #include "table_operations.hpp"
 #include "utils/query.hpp"
@@ -40,7 +42,7 @@ course::mainLogic(int argc, char** argv)
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
 
   float main_scale =
-    ImGui_ImplGlfw_GetContentScaleForMonitor(glfwGetPrimaryMonitor());
+    ImGui_ImplGlfw_GetContentScaleForMonitor(glfwGetPrimaryMonitor()) * 1.2;
 
   using query_res_t = pqxx::result;
   using row_t = pqxx::row;
@@ -64,6 +66,7 @@ course::mainLogic(int argc, char** argv)
 
     glfwMakeContextCurrent(window);
     glfwSwapInterval(1); // Enable vsync
+
     // Setup Dear ImGui context
     IMGUI_CHECKVERSION();
     ImGui::CreateContext();
@@ -85,6 +88,9 @@ course::mainLogic(int argc, char** argv)
     ImGui_ImplOpenGL3_Init(glsl_version);
 
     ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+    std::vector< std::string > table_names{
+      "masters", "services", "cars", "works"
+    };
 
     while (!glfwWindowShouldClose(window))
     {
@@ -112,7 +118,52 @@ course::mainLogic(int argc, char** argv)
       // Create new window
       ImGui::Begin("MainWindow", open_indicator, main_window_flags);
 
-      course::place_clickable_table(connection, "public", "services");
+      // ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
+      //   if (ImGui::BeginTabBar("MyTabBar", tab_bar_flags))
+      //   {
+      //     if (ImGui::BeginTabItem("Avocado"))
+      //     {
+      //       ImGui::Text("This is the Avocado tab!\nblah blah blah blah
+      //       blah"); ImGui::EndTabItem();
+      //     }
+      //     if (ImGui::BeginTabItem("Broccoli"))
+      //     {
+      //       ImGui::Text("This is the Broccoli tab!\nblah blah blah blah
+      //       blah"); ImGui::EndTabItem();
+      //     }
+      //     if (ImGui::BeginTabItem("Cucumber"))
+      //     {
+      //       ImGui::Text("This is the Cucumber tab!\nblah blah blah blah
+      //       blah"); ImGui::EndTabItem();
+      //     }
+      //     ImGui::EndTabBar();
+      //   }
+
+      for (const auto& table_name: table_names)
+      {
+        if (ImGui::TreeNode(table_name.c_str()))
+        {
+          course::place_clickable_table(connection, "public", table_name);
+          if (ImGui::Button("Insert"))
+          {
+            ImGui::OpenPopup("Insert");
+          }
+          insert_popup(
+            connection, table_name, { "(column,..)", "('str', int,..)" });
+          if (ImGui::Button("Update"))
+          {
+            ImGui::OpenPopup("Update");
+          }
+          update_popup(connection, table_name, { "column", "value", "where" });
+
+          if (ImGui::Button("Delete"))
+          {
+            ImGui::OpenPopup("Delete");
+          }
+          delete_popup(connection, table_name, { "where" });
+          ImGui::TreePop();
+        }
+      }
 
       ImGui::End();
 
@@ -144,6 +195,7 @@ course::mainLogic(int argc, char** argv)
     //
     // assign_work(connection, "11", "1", "1", "2020-04-12");
     //
+    update_table(connection, "masters", "name", "'vanya'", "id=27");
     // for (const auto& row: res)
     // {
     //   auto [id, name] = row.as< int, std::string >();
