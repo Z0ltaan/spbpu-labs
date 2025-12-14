@@ -1,10 +1,10 @@
 CREATE TYPE score_table_row as (id INTEGER, name TEXT, cars INTEGER);
 
 CREATE
-OR REPLACE PROCEDURE get_scores_table (cmonth INTEGER, INOUT scores score_table_row[] DEFAULT ARRAY[]::score_table_row[]) LANGUAGE plpgsql AS $$ 
+OR REPLACE PROCEDURE get_scores_table (cmonth INTEGER, cyear INTEGER, INOUT scores score_table_row[] DEFAULT ARRAY[]::score_table_row[]) LANGUAGE plpgsql AS $$
 DECLARE 
   pos INTEGER := 0;
-  cyear INTEGER := EXTRACT(year from CURRENT_DATE);
+  -- cyear INTEGER := EXTRACT(year from CURRENT_DATE);
   crow score_table_row;
 
     master_cursor CURSOR FOR

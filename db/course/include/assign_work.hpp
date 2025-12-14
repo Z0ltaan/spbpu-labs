@@ -3,10 +3,13 @@
 
 #include <pqxx/pqxx>
 
-namespace course {
-void assign_work(pqxx::connection &c, const std::string &master,
-                 const std::string &service, const std::string &car,
-                 const std::string &date);
+namespace course
+{
+  void assign_work(pqxx::connection& c,
+                   const std::string& master,
+                   const std::string& service,
+                   const std::string& car,
+                   const std::string& date);
 }
 
 #endif

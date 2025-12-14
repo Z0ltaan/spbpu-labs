@@ -90,6 +90,7 @@ int course::mainLogic(int argc, char **argv)
     return -1;
   }
 
+  std::cout << config.bounds.max << ' ' << config.bounds.min << '\n';
   // define program flow
   size_t programFlowPos = 0;
   std::vector< course::ProgramState > programFlow;

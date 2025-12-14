@@ -25,3 +25,10 @@ CREATE TABLE works (
   car_id INTEGER NOT NULL,
   service_id INTEGER NOT NULL
 );
+
+CREATE TABLE users (
+  id INTEGER GENERATED ALWAYS AS IDENTITY,
+  login CHAR(255) UNIQUE NOT NULL,
+  password CHAR(255) NOT NULL,
+  role text not null
+);

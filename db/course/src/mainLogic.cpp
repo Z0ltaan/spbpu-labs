@@ -1,4 +1,5 @@
 #include "mainLogic.hpp"
+#include <exception>
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
@@ -8,15 +9,20 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
-#include "assign_work.hpp"
+#include "gui/call_error_window.hpp"
+#include "gui/call_login_window.hpp"
 #include "gui/clickable_table.hpp"
+#include "gui/statistics_tab.hpp"
 #include "gui/table_interaction.hpp"
+#include "gui/work_assignment_tab.hpp"
 #include "read_config.hpp"
-#include "table_operations.hpp"
-#include "utils/query.hpp"
+#include "user_token.hpp"
 
 #define GL_SILENCE_DEPRECATION
 #include <GLFW/glfw3.h>
+
+bool show_error_window = false;
+std::string last_error_message;
 
 static void
 glfw_error_callback(int error, const char* description)
@@ -48,49 +54,50 @@ course::mainLogic(int argc, char** argv)
   using row_t = pqxx::row;
 
   GLFWwindow* window = nullptr;
+  // NOTE: create connection to database
+  std::string connection_options;
+  read_config(connection_options, argv[1]);
+  pqxx::connection connection(connection_options);
+  std::cout << "Connected to " << connection.dbname() << '\n';
+
+  window = glfwCreateWindow((int) (1280 * main_scale),
+                            (int) (800 * main_scale),
+                            "Car center helper",
+                            nullptr,
+                            nullptr);
+  if (!window)
+    throw std::runtime_error("Could not create a window");
+
+  glfwMakeContextCurrent(window);
+  glfwSwapInterval(1); // Enable vsync
+
+  // Setup Dear ImGui context
+  IMGUI_CHECKVERSION();
+  ImGui::CreateContext();
+  ImGuiIO& io = ImGui::GetIO();
+  (void) io;
+  io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
+  io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
+
+  // Setup Dear ImGui style
+  ImGui::StyleColorsDark();
+
+  // Setup scaling
+  ImGuiStyle& style = ImGui::GetStyle();
+  style.ScaleAllSizes(main_scale);
+  style.FontScaleDpi = main_scale;
+
+  // Setup Platform/Renderer backends
+  ImGui_ImplGlfw_InitForOpenGL(window, true);
+  ImGui_ImplOpenGL3_Init(glsl_version);
+
+  ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+  std::vector< std::string > table_names{
+    "masters", "services", "cars", "works", "users"
+  };
+
   try
   {
-    // NOTE: create connection to database
-    std::string connection_options;
-    read_config(connection_options, argv[1]);
-    pqxx::connection connection(connection_options);
-    std::cout << "Connected to " << connection.dbname() << '\n';
-
-    window = glfwCreateWindow((int) (1280 * main_scale),
-                              (int) (800 * main_scale),
-                              "Car center helper",
-                              nullptr,
-                              nullptr);
-    if (!window)
-      throw std::runtime_error("Could not create a window");
-
-    glfwMakeContextCurrent(window);
-    glfwSwapInterval(1); // Enable vsync
-
-    // Setup Dear ImGui context
-    IMGUI_CHECKVERSION();
-    ImGui::CreateContext();
-    ImGuiIO& io = ImGui::GetIO();
-    (void) io;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;
-    io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;
-
-    // Setup Dear ImGui style
-    ImGui::StyleColorsDark();
-
-    // Setup scaling
-    ImGuiStyle& style = ImGui::GetStyle();
-    style.ScaleAllSizes(main_scale);
-    style.FontScaleDpi = main_scale;
-
-    // Setup Platform/Renderer backends
-    ImGui_ImplGlfw_InitForOpenGL(window, true);
-    ImGui_ImplOpenGL3_Init(glsl_version);
-
-    ImVec4 clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-    std::vector< std::string > table_names{
-      "masters", "services", "cars", "works"
-    };
 
     while (!glfwWindowShouldClose(window))
     {
@@ -115,57 +122,63 @@ course::mainLogic(int argc, char** argv)
       ImGui::SetNextWindowSize(io.DisplaySize);
       ImGui::SetNextWindowPos(ImVec2{ 0, 0 });
 
-      // Create new window
-      ImGui::Begin("MainWindow", open_indicator, main_window_flags);
-
-      // ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
-      //   if (ImGui::BeginTabBar("MyTabBar", tab_bar_flags))
-      //   {
-      //     if (ImGui::BeginTabItem("Avocado"))
-      //     {
-      //       ImGui::Text("This is the Avocado tab!\nblah blah blah blah
-      //       blah"); ImGui::EndTabItem();
-      //     }
-      //     if (ImGui::BeginTabItem("Broccoli"))
-      //     {
-      //       ImGui::Text("This is the Broccoli tab!\nblah blah blah blah
-      //       blah"); ImGui::EndTabItem();
-      //     }
-      //     if (ImGui::BeginTabItem("Cucumber"))
-      //     {
-      //       ImGui::Text("This is the Cucumber tab!\nblah blah blah blah
-      //       blah"); ImGui::EndTabItem();
-      //     }
-      //     ImGui::EndTabBar();
-      //   }
-
-      for (const auto& table_name: table_names)
+      static bool logged_in = false;
+      static UserToken current_user;
+      if (!logged_in)
       {
-        if (ImGui::TreeNode(table_name.c_str()))
-        {
-          course::place_clickable_table(connection, "public", table_name);
-          if (ImGui::Button("Insert"))
-          {
-            ImGui::OpenPopup("Insert");
-          }
-          insert_popup(
-            connection, table_name, { "(column,..)", "('str', int,..)" });
-          if (ImGui::Button("Update"))
-          {
-            ImGui::OpenPopup("Update");
-          }
-          update_popup(connection, table_name, { "column", "value", "where" });
-
-          if (ImGui::Button("Delete"))
-          {
-            ImGui::OpenPopup("Delete");
-          }
-          delete_popup(connection, table_name, { "where" });
-          ImGui::TreePop();
-        }
+        call_login_window(connection, logged_in, current_user);
       }
+      else
+      {
+        // Create new window
+        ImGui::Begin("MainWindow", open_indicator, main_window_flags);
 
-      ImGui::End();
+        ImGuiTabBarFlags tab_bar_flags = ImGuiTabBarFlags_None;
+        if (ImGui::BeginTabBar("worktabs", tab_bar_flags))
+        {
+          if (current_user.is_admin() && ImGui::BeginTabItem("Tables"))
+          {
+            for (const auto& table_name: table_names)
+            {
+              if (ImGui::TreeNode(table_name.c_str()))
+              {
+                course::place_clickable_table(connection, "public", table_name);
+                if (ImGui::Button("Insert"))
+                {
+                  ImGui::OpenPopup("Insert");
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Update"))
+                {
+                  ImGui::OpenPopup("Update");
+                }
+                ImGui::SameLine();
+                if (ImGui::Button("Delete"))
+                {
+                  ImGui::OpenPopup("Delete");
+                }
+                insert_popup(
+                  connection, table_name, { "(column,..)", "('str', int,..)" });
+                update_popup(
+                  connection, table_name, { "column", "value", "where" });
+                delete_popup(connection, table_name, { "where" });
+                ImGui::TreePop();
+              }
+            }
+            ImGui::EndTabItem();
+          }
+          place_work_assignment_tab(connection,
+                                    { { "masters", "name" },
+                                      { "services", "name" },
+                                      { "cars", "num" } });
+          place_scores_table_tab(connection);
+          place_costs_tab(connection);
+          ImGui::EndTabBar();
+        }
+        ImGui::End();
+      }
+      if (show_error_window)
+        call_error_window(&show_error_window, last_error_message);
 
       // Rendering
       ImGui::Render();
@@ -181,26 +194,6 @@ course::mainLogic(int argc, char** argv)
 
       glfwSwapBuffers(window);
     }
-
-    // pqxx::result res = query(connection, "call get_scores_table($1)", {2});
-    // auto arr_entry = res.front().front().as_sql_array<std::string>();
-
-    // pqxx::result res = query(connection, "call sum_up_costs($1)",
-    // {"10months"}); auto arr_entry = res.front().front().as<int>();
-    // std::cout << arr_entry << '\n';
-    // delete_from(connection, "masters", "name='van'");
-    // insert_into(connection, "masters", "(name)", "('van')");
-    // query_res_t res =
-    //   query(connection, "SELECT * from masters where name = 'van'", {});
-    //
-    // assign_work(connection, "11", "1", "1", "2020-04-12");
-    //
-    update_table(connection, "masters", "name", "'vanya'", "id=27");
-    // for (const auto& row: res)
-    // {
-    //   auto [id, name] = row.as< int, std::string >();
-    //   std::cout << id << ' ' << name << '\n';
-    // }
   }
   catch (const std::exception& e)
   {

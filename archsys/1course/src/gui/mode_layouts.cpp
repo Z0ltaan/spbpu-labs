@@ -112,6 +112,7 @@ void course::call_automatic_mode_layout(const course::ProgramState &state, const
     ImGui::Text("%f", double(state.accumulatedRequestTime) / double(state.processed_requests));
     ImGui::TableNextColumn();
     ImGui::Text("%f", double(state.produced_requests) / double(state.processed_requests));
+    // ImGui::Text("%f", double(config.lambda / (config.bounds.max + config.bounds.min) / 2.0));
     ImGui::EndTable();
   }
 }

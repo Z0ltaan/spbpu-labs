@@ -32,14 +32,14 @@ INSERT INTO
 VALUES
   ('someservice2', 100, 20);
 
-BEGIN;
-
 select
   *
 from
   cars;
 
 COMMIT;
+
+BEGIN;
 
 INSERT INTO
   works (date_work, master_id, car_id, service_id)

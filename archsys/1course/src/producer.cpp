@@ -11,7 +11,7 @@ std::istream &course::operator>>(std::istream &in, UniformRandomGenerator::Bound
 
   auto tmp = bounds;
 
-  in >> tmp.min >> tmp.min;
+  in >> tmp.min >> tmp.max;
 
   if (in && tmp.min >= 0 && tmp.max >= 0)
   {
