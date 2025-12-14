@@ -1,1 +1,0 @@
-/usr/bin/c++ -g CMakeFiles/z4.dir/main.cpp.o -o z4 

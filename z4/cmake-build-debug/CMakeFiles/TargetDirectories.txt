@@ -1,3 +1,0 @@
-/home/ghorjass/z4/cmake-build-debug/CMakeFiles/z4.dir
-/home/ghorjass/z4/cmake-build-debug/CMakeFiles/edit_cache.dir
-/home/ghorjass/z4/cmake-build-debug/CMakeFiles/rebuild_cache.dir
