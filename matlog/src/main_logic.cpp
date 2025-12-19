@@ -36,20 +36,24 @@ int course::main_logic(int argc, char **argv)
     I += LOG_N * M;
   }
 
+  // NOTE: НЕ ЗНАЮ КАК ИХ ЗАДАВАТЬ
   // здесь должны быть ограничения
   // они описаны формально при рассмотрении задачи Эйнштейна
   // вывод результатов
-  auto &task = properties[0][0][0];
-  out.open("out.txt");
-  unsigned satcount = (unsigned) bdd_satcount(task);
-  out << satcount << " solutions:\n";
-  if (satcount)
-    bdd_allsat(task, fun);
+
+  // NOTE: не знаю чем должен быть task
+  // auto &task = properties[0][0][0];
+  // out.open("out.txt");
+  // unsigned satcount = (unsigned) bdd_satcount(task);
+  // out << satcount << " solutions:\n";
+  // if (satcount)
+  //   bdd_allsat(task, fun);
   bdd_done();
   return 0;
 }
 
 char var[N_VAR];
+// TODO: change signature for it to accept ref to ostream and maybe get rid of global variable
 void print()
 {
   for (unsigned i = 0; i < N; i++)
@@ -68,6 +72,7 @@ void print()
   out << std::endl;
 }
 
+// TODO: Rewrite
 void build(char *varset, unsigned n, unsigned I)
 {
   if (I == n - 1)
