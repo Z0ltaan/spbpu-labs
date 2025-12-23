@@ -33,7 +33,7 @@ course::place_scores_table_tab(pqxx::connection& c)
     {
       // set column names of the table
       ImGui::TableSetupColumn("Place");
-      ImGui::TableSetupColumn("Master info");
+      ImGui::TableSetupColumn("Master info (master id, name, car count)");
       ImGui::TableHeadersRow();
 
       for (size_t i = 0; i < data.size(); ++i)

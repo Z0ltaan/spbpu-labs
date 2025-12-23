@@ -124,11 +124,7 @@ course::mainLogic(int argc, char** argv)
 
       static bool logged_in = false;
       static UserToken current_user;
-      if (!logged_in)
-      {
-        call_login_window(connection, logged_in, current_user);
-      }
-      else
+      if (logged_in)
       {
         // Create new window
         ImGui::Begin("MainWindow", open_indicator, main_window_flags);
@@ -177,6 +173,11 @@ course::mainLogic(int argc, char** argv)
         }
         ImGui::End();
       }
+      else
+      {
+        call_login_window(connection, logged_in, current_user);
+      }
+
       if (show_error_window)
         call_error_window(&show_error_window, last_error_message);
 
