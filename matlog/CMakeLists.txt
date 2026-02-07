@@ -11,6 +11,7 @@ target_link_libraries(${PROJECT_NAME}
 
 target_include_directories(${PROJECT_NAME}
                            PUBLIC ${CMAKE_HOME_DIRECTORY}/include)
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
 
 if(CMAKE_EXPORT_COMPILE_COMMANDS)
   add_custom_target(

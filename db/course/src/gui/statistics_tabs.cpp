@@ -1,5 +1,6 @@
 #include <algorithm>
 #include <cstddef>
+#include <fstream>
 #include <imgui.h>
 #include <vector>
 #include "get_column_values.hpp"
@@ -7,11 +8,32 @@
 #include "utils/query.hpp"
 
 void
-course::place_scores_table_tab(pqxx::connection& c)
+course::place_statistics_tab(pqxx::connection& c)
 {
-  if (ImGui::BeginTabItem("Scores table"))
+  if (ImGui::BeginTabItem("Statistics"))
   {
-    // bool empty ;
+    static pqxx::result res;
+
+    auto arr_entry = !res.size() ? 0 : res.front().front().as< int >();
+    static char interval[20] = { '0' };
+    ImGui::InputText(
+      "Interval back from current year", interval, IM_ARRAYSIZE(interval));
+
+    if (ImGui::Button("Check"))
+    {
+      if (interval[0] == '\0')
+      {
+        interval[1] = interval[0];
+        interval[0] = '0';
+      }
+      res = query(c, "call sum_up_costs($1)", { interval });
+    }
+
+    ImGui::Text("Cost sum: ");
+    ImGui::SameLine();
+    ImGui::Text("%d", arr_entry);
+
+    // scores table
     static int month;
     static int year;
     ImGui::InputInt("Input month", &month);
@@ -46,35 +68,22 @@ course::place_scores_table_tab(pqxx::connection& c)
       }
       ImGui::EndTable();
     }
-    ImGui::EndTabItem();
-  }
-}
-
-void
-course::place_costs_tab(pqxx::connection& c)
-{
-  if (ImGui::BeginTabItem("Costs"))
-  {
-    static pqxx::result res;
-
-    auto arr_entry = !res.size() ? 0 : res.front().front().as< int >();
-    static char interval[20] = { '0' };
-    ImGui::InputText(
-      "Interval back from current year", interval, IM_ARRAYSIZE(interval));
-
-    if (ImGui::Button("Check"))
+    if (ImGui::Button("Export statistics"))
     {
-      if (interval[0] == '\0')
+      std::ofstream out("statistics.txt");
+      if (out.is_open())
       {
-        interval[1] = interval[0];
-        interval[0] = '0';
-      }
-      res = query(c, "call sum_up_costs($1)", { interval });
-    }
+        out << "Summed up costs ====\n";
+        out << arr_entry << '\n';
 
-    ImGui::Text("Cost sum: ");
-    ImGui::SameLine();
-    ImGui::Text("%d", arr_entry);
+        out << "Scores table ====\n";
+        out << "Place | Master info (master id, name, car count)\n";
+        for (size_t i = 0; i < data.size(); ++i)
+        {
+          out << i + 1 << " | " << data[i] << '\n';
+        }
+      }
+    }
     ImGui::EndTabItem();
   }
 }

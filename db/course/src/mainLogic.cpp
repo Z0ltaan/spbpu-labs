@@ -167,8 +167,7 @@ course::mainLogic(int argc, char** argv)
                                     { { "masters", "name" },
                                       { "services", "name" },
                                       { "cars", "num" } });
-          place_scores_table_tab(connection);
-          place_costs_tab(connection);
+          place_statistics_tab(connection);
           ImGui::EndTabBar();
         }
         ImGui::End();
