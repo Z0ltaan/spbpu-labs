@@ -9,11 +9,6 @@
 static constexpr int N = 9; // число объектов;
 static constexpr int M = 4; // число свойств
 
-// static constexpr int n1 = 7;
-// static constexpr int n2 = 4;
-// static constexpr int n3 = 2;
-// static constexpr int n4 = 6;
-
 static const int LOG_N = std::ceil(std::log2(N));
 static const int N_VAR = N * M * LOG_N; // число булевых переменных
 static const size_t N_SQRT = static_cast< size_t >(std::sqrt(N));
@@ -37,28 +32,24 @@ bdd_eql(const bdd& a, const bdd& b)
   return (a & b) | (!a & !b);
 }
 
-static void
-evaluate_constraint(bdd& func,
-                    const props_array& props,
-                    const course::constraint1& c)
+static bdd
+evaluate_constraint(const props_array& props, const course::constraint1& c)
 {
-  func &= props.at(c.prop).at(c.obj).at(c.value);
+  return props.at(c.prop).at(c.obj).at(c.value);
 }
 
 // TODO: rewrite this shit so .at is used instead of []
-static void
-evaluate_constraint(bdd& func,
-                    const props_array& props,
-                    const course::constraint2& c)
+static bdd
+evaluate_constraint(const props_array& props, const course::constraint2& c)
 {
   bdd to_return = bddtrue;
   auto upper_bound = props.front().size();
   for (size_t i = 0; i < upper_bound; ++i)
   {
-    func &= bdd_eql(props[c.first.prop][i][c.first.value],
-                    props[c.second.prop][i][c.second.value]);
+    to_return &= bdd_eql(props[c.first.prop][i][c.first.value],
+                         props[c.second.prop][i][c.second.value]);
   }
-  // return to_return;
+  return to_return;
 }
 
 static bdd
@@ -111,16 +102,11 @@ evaluate_constraint(const props_array& props, const course::constraint3& c)
   return to_return;
 }
 
-static void
-evaluate_constraint4(bdd& func,
-                     const props_array& props,
-                     const course::constraint3& c)
+static bdd
+evaluate_constraint(const props_array& props, const course::constraint4& c)
 {
-  func &= evaluate_constraint(props, c) |
-          evaluate_constraint(
-            props,
-            course::constraint3{
-              .side = c.side == 'd' ? 'u' : 'd', .lhs = c.lhs, .rhs = c.rhs });
+  return evaluate_constraint(props, c.first) |
+         evaluate_constraint(props, c.second);
 }
 
 int
@@ -129,7 +115,6 @@ course::main_logic(int argc, char** argv)
   static_assert((N > 0 && M > 0) && (M < N), "check your N and M values");
 
   props_array properties;
-  std::cout << LOG_N << ' ' << N_VAR << ' ' << '\n';
 
   size_t nodenum = 10000000;
   size_t cache_size = 100000;
@@ -167,24 +152,17 @@ course::main_logic(int argc, char** argv)
   task &= properties[0][6][6];
 
   // NOTE: 2nd level constraint
-  // task &=
-  evaluate_constraint(
-    task,
+  task &= evaluate_constraint(
     properties,
     constraint2{ { .prop = 2, .value = 1 }, { .prop = 3, .value = 1 } });
-  // // task &=
-  evaluate_constraint(
-    task,
+  task &= evaluate_constraint(
     properties,
     constraint2{ { .prop = 3, .value = 0 }, { .prop = 1, .value = 0 } });
-  // // task &=
-  evaluate_constraint(
-    task,
+  task &= evaluate_constraint(
     properties,
     constraint2{ { .prop = 3, .value = 2 }, { .prop = 1, .value = 2 } });
-  // // task &=
-  evaluate_constraint(
-    task,
+  task &= evaluate_constraint(
+
     properties,
     constraint2{ { .prop = 3, .value = 4 }, { .prop = 2, .value = 4 } });
 
@@ -213,62 +191,72 @@ course::main_logic(int argc, char** argv)
   task &= properties[2][0][0];
   task &= properties[2][1][1];
   task &= properties[2][2][2];
-  task &= properties[2][3][3];
-
-  // NOTE: do not need
-  // task &= properties[2][4][4];
-  // task &= properties[2][5][5];
-  // task &= properties[2][6][6];
-  // task &= properties[2][7][7];
-  // task &= properties[2][8][8];
-  //
-  // task &= properties[3][0][0];
-  // task &= properties[3][1][1];
-  // task &= properties[3][2][2];
-  // task &= properties[3][3][3];
-  // task &= properties[3][4][4];
-  // task &= properties[3][5][5];
-  // task &= properties[3][6][6];
-  // task &= properties[3][7][7];
-  // task &= properties[3][8][8];
 
   // NOTE: 4th level constraints
-  evaluate_constraint4(task,
-                       properties,
-                       course::constraint3{ .side = 'u',
-                                            .lhs = { .prop = 1, .value = 6 },
-                                            .rhs = { .prop = 2, .value = 5 } });
-  evaluate_constraint4(task,
-                       properties,
-                       course::constraint3{ .side = 'u',
-                                            .lhs = { .prop = 0, .value = 7 },
-                                            .rhs = { .prop = 2, .value = 3 } });
+  task &= evaluate_constraint(
+    properties,
+    course::constraint4{
+      course::constraint3{ .side = 'u',
+                           .lhs = { .prop = 1, .value = 6 },
+                           .rhs = { .prop = 2, .value = 5 } },
+      course::constraint3{ .side = 'd',
+                           .lhs = { .prop = 1, .value = 6 },
+                           .rhs = { .prop = 2, .value = 5 } } });
+  task &= evaluate_constraint(
+    properties,
+    course::constraint4{
+      course::constraint3{ .side = 'u',
+                           .lhs = { .prop = 0, .value = 7 },
+                           .rhs = { .prop = 2, .value = 3 } },
+      course::constraint3{ .side = 'd',
+                           .lhs = { .prop = 0, .value = 7 },
+                           .rhs = { .prop = 2, .value = 3 } } });
 
-  evaluate_constraint4(task,
-                       properties,
-                       course::constraint3{ .side = 'u',
-                                            .lhs = { .prop = 0, .value = 7 },
-                                            .rhs = { .prop = 2, .value = 3 } });
-  evaluate_constraint4(task,
-                       properties,
-                       course::constraint3{ .side = 'd',
-                                            .lhs = { .prop = 1, .value = 0 },
-                                            .rhs = { .prop = 2, .value = 5 } });
-  evaluate_constraint4(task,
-                       properties,
-                       course::constraint3{ .side = 'd',
-                                            .lhs = { .prop = 1, .value = 3 },
-                                            .rhs = { .prop = 2, .value = 8 } });
-  evaluate_constraint4(task,
-                       properties,
-                       course::constraint3{ .side = 'u',
-                                            .lhs = { .prop = 1, .value = 6 },
-                                            .rhs = { .prop = 0, .value = 5 } });
-  evaluate_constraint4(task,
-                       properties,
-                       course::constraint3{ .side = 'u',
-                                            .lhs = { .prop = 2, .value = 4 },
-                                            .rhs = { .prop = 2, .value = 0 } });
+  task &= evaluate_constraint(
+    properties,
+    course::constraint4{
+      course::constraint3{ .side = 'u',
+                           .lhs = { .prop = 0, .value = 7 },
+                           .rhs = { .prop = 2, .value = 3 } },
+      course::constraint3{ .side = 'd',
+                           .lhs = { .prop = 0, .value = 7 },
+                           .rhs = { .prop = 2, .value = 3 } } });
+  task &= evaluate_constraint(
+    properties,
+    course::constraint4{
+      course::constraint3{ .side = 'd',
+                           .lhs = { .prop = 1, .value = 0 },
+                           .rhs = { .prop = 2, .value = 5 } },
+      course::constraint3{ .side = 'u',
+                           .lhs = { .prop = 1, .value = 0 },
+                           .rhs = { .prop = 2, .value = 5 } } });
+  task &= evaluate_constraint(
+    properties,
+    course::constraint4{
+      course::constraint3{ .side = 'd',
+                           .lhs = { .prop = 1, .value = 3 },
+                           .rhs = { .prop = 2, .value = 8 } },
+      course::constraint3{ .side = 'u',
+                           .lhs = { .prop = 1, .value = 3 },
+                           .rhs = { .prop = 2, .value = 8 } } });
+  task &= evaluate_constraint(
+    properties,
+    course::constraint4{
+      course::constraint3{ .side = 'u',
+                           .lhs = { .prop = 1, .value = 6 },
+                           .rhs = { .prop = 0, .value = 5 } },
+      course::constraint3{ .side = 'd',
+                           .lhs = { .prop = 1, .value = 6 },
+                           .rhs = { .prop = 0, .value = 5 } } });
+  task &= evaluate_constraint(
+    properties,
+    course::constraint4{
+      course::constraint3{ .side = 'u',
+                           .lhs = { .prop = 2, .value = 4 },
+                           .rhs = { .prop = 2, .value = 0 } },
+      course::constraint3{ .side = 'd',
+                           .lhs = { .prop = 2, .value = 4 },
+                           .rhs = { .prop = 2, .value = 0 } } });
 
   // NOTE: lvl 5 constraints
   for (int k = 0; k < M; ++k)
@@ -300,10 +288,12 @@ course::main_logic(int argc, char** argv)
   }
 
   double satcount = bdd_satcount(task);
-  if (satcount)
+  std::cout << "Solution count: "<< satcount << '\n';
+  if (satcount != 0 && satcount <= 10000)
   {
     out.open("out.txt");
-    if (!out.is_open()) {
+    if (!out.is_open())
+    {
       return -1;
     }
     out << satcount << " solutions:\n";

@@ -1,7 +1,6 @@
 CMake*/
 !.gitignore
 build/
-out.txt
 *.zip
 cmake-build-debug/
 compile_commands.json
