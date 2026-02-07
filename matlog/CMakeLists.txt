@@ -11,7 +11,7 @@ target_link_libraries(${PROJECT_NAME}
 
 target_include_directories(${PROJECT_NAME}
                            PUBLIC ${CMAKE_HOME_DIRECTORY}/include)
-target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_20)
+target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
 
 if(CMAKE_EXPORT_COMPILE_COMMANDS)
   add_custom_target(
@@ -21,5 +21,6 @@ if(CMAKE_EXPORT_COMPILE_COMMANDS)
       ${CMAKE_BINARY_DIR}/compile_commands.json
       ${CMAKE_SOURCE_DIR}/compile_commands.json
     COMMENT "Copying compile_commands.json to ${CMAKE_SOURCE_DIR}")
+
   add_dependencies(${PROJECT_NAME} copy_compile_commands)
 endif()
