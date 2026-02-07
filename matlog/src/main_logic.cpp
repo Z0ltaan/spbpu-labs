@@ -5,7 +5,6 @@
 #include <cstddef>
 #include <filesystem>
 #include <fstream>
-#include <istream>
 #include <iterator>
 #include <ostream>
 #include <vector>
@@ -148,11 +147,6 @@ course::main_logic(int argc, char** argv)
       std::cerr << "bad config data\n";
       return -1;
     }
-
-    // std::copy(constraints.begin(),
-    //           constraints.end(),
-    //           std::ostream_iterator< general_constraint >{ std::cout, "\n"
-    //           });
   }
   props_array properties;
 
@@ -193,114 +187,6 @@ course::main_logic(int argc, char** argv)
     std::for_each(
       constraints.begin(), constraints.end(), evaluate_general_constraint);
   }
-
-  // NOTE: 1st level constraints
-  // task &= properties[0][0][0];
-  // task &= properties[0][1][1];
-  // task &= properties[0][2][2];
-  // task &= properties[0][3][3];
-  // task &= properties[0][4][4];
-  // task &= properties[0][5][5];
-  // task &= properties[0][6][6];
-  //
-  // // NOTE: 2nd level constraint
-  // task &= evaluate_constraint(
-  //   properties,
-  //   constraint2{ { .prop = 2, .value = 1 }, { .prop = 3, .value = 1 } });
-  // task &= evaluate_constraint(
-  //   properties,
-  //   constraint2{ { .prop = 3, .value = 0 }, { .prop = 1, .value = 0 } });
-  // task &= evaluate_constraint(
-  //   properties,
-  //   constraint2{ { .prop = 3, .value = 2 }, { .prop = 1, .value = 2 } });
-  // task &= evaluate_constraint(
-  //   properties,
-  //   constraint2{ { .prop = 3, .value = 4 }, { .prop = 2, .value = 4 } });
-
-  // NOTE: 3rd level constraint
-  // task &= evaluate_constraint(properties,
-  //                             constraint3{ .side = 'u',
-  //                                          .lhs = { .prop = 3, .value = 8 },
-  //                                          .rhs = { .prop = 0, .value = 4 }
-  //                                          });
-  // task &= evaluate_constraint(properties,
-  //                             constraint3{ .side = 'd',
-  //                                          .lhs = { .prop = 2, .value = 5 },
-  //                                          .rhs = { .prop = 3, .value = 7 }
-  //                                          });
-
-  // task &= properties[0][7][7];
-  // task &= properties[0][8][8];
-  //
-  // task &= properties[1][0][0];
-  // task &= properties[1][1][1];
-  // task &= properties[1][2][2];
-  // task &= properties[1][3][3];
-  // task &= properties[1][4][4];
-  // task &= properties[1][5][5];
-  // task &= properties[1][6][6];
-  // task &= properties[1][7][7];
-  // task &= properties[1][8][8];
-  //
-  // task &= properties[2][0][0];
-  // task &= properties[2][1][1];
-  // task &= properties[2][2][2];
-
-  // NOTE: 4th level constraints
-  // task &= evaluate_constraint(
-  //   properties,
-  //   course::constraint4{
-  //     course::constraint3{ .side = 'u',
-  //                          .lhs = { .prop = 1, .value = 6 },
-  //                          .rhs = { .prop = 2, .value = 5 } },
-  //     course::constraint3{ .side = 'd',
-  //                          .lhs = { .prop = 1, .value = 6 },
-  //                          .rhs = { .prop = 2, .value = 5 } } });
-  // task &= evaluate_constraint(
-  //   properties,
-  //   course::constraint4{
-  //     course::constraint3{ .side = 'u',
-  //                          .lhs = { .prop = 0, .value = 7 },
-  //                          .rhs = { .prop = 2, .value = 3 } },
-  //     course::constraint3{ .side = 'd',
-  //                          .lhs = { .prop = 0, .value = 7 },
-  //                          .rhs = { .prop = 2, .value = 3 } } });
-  // task &= evaluate_constraint(
-  //   properties,
-  //   course::constraint4{
-  //     course::constraint3{ .side = 'd',
-  //                          .lhs = { .prop = 1, .value = 0 },
-  //                          .rhs = { .prop = 2, .value = 5 } },
-  //     course::constraint3{ .side = 'u',
-  //                          .lhs = { .prop = 1, .value = 0 },
-  //                          .rhs = { .prop = 2, .value = 5 } } });
-  // task &= evaluate_constraint(
-  //   properties,
-  //   course::constraint4{
-  //     course::constraint3{ .side = 'd',
-  //                          .lhs = { .prop = 1, .value = 3 },
-  //                          .rhs = { .prop = 2, .value = 8 } },
-  //     course::constraint3{ .side = 'u',
-  //                          .lhs = { .prop = 1, .value = 3 },
-  //                          .rhs = { .prop = 2, .value = 8 } } });
-  // task &= evaluate_constraint(
-  //   properties,
-  //   course::constraint4{
-  //     course::constraint3{ .side = 'u',
-  //                          .lhs = { .prop = 1, .value = 6 },
-  //                          .rhs = { .prop = 0, .value = 5 } },
-  //     course::constraint3{ .side = 'd',
-  //                          .lhs = { .prop = 1, .value = 6 },
-  //                          .rhs = { .prop = 0, .value = 5 } } });
-  // task &= evaluate_constraint(
-  //   properties,
-  //   course::constraint4{
-  //     course::constraint3{ .side = 'u',
-  //                          .lhs = { .prop = 2, .value = 4 },
-  //                          .rhs = { .prop = 2, .value = 0 } },
-  //     course::constraint3{ .side = 'd',
-  //                          .lhs = { .prop = 2, .value = 4 },
-  //                          .rhs = { .prop = 2, .value = 0 } } });
 
   // NOTE: lvl 5 constraints
   for (int k = 0; k < M; ++k)
