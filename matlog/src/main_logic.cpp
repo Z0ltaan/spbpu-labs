@@ -3,6 +3,7 @@
 #include <buddy/bdd.h>
 #include <cmath>
 #include <cstddef>
+#include <cstdlib>
 #include <filesystem>
 #include <fstream>
 #include <iterator>
@@ -34,6 +35,7 @@ bdd_eql(const bdd& a, const bdd& b)
 {
   return (a & b) | (!a & !b);
 }
+
 bdd
 evaluate_constraint(const props_array& props, const course::constraint1& c)
 {
@@ -59,16 +61,17 @@ evaluate_constraint(const props_array& props, const course::constraint3& c)
 {
   bdd to_return = bddtrue;
   static const size_t N_SQRT = static_cast< size_t >(std::sqrt(N));
+  static const char * split_allowed = std::getenv("SPLIT");
   const auto upper_bound = props.front().size();
   if (c.side == 'u')
   {
     for (size_t i = 0; i < upper_bound; ++i)
     {
-      if (i / N_SQRT == 0)
+      if (i / N_SQRT == 0 || (i % N_SQRT == 0 && !split_allowed))
       {
         to_return &= !props[c.lhs.prop][i][c.lhs.value];
       }
-      else if (i % N_SQRT == 0)
+      else if (i % N_SQRT == 0 && split_allowed)
       {
         to_return &= bdd_eql(props[c.lhs.prop][i][c.lhs.value],
                              props[c.rhs.prop][i - 1][c.rhs.value]);
@@ -84,11 +87,11 @@ evaluate_constraint(const props_array& props, const course::constraint3& c)
   {
     for (size_t i = 0; i < upper_bound; ++i)
     {
-      if (i / N_SQRT >= N_SQRT - 1)
+      if (i / N_SQRT >= N_SQRT - 1 || (i % N_SQRT == 0 && !split_allowed))
       {
         to_return &= !props[c.lhs.prop][i][c.lhs.value];
       }
-      else if (i % N_SQRT == 0)
+      else if (i % N_SQRT == 0 && split_allowed)
       {
         to_return &=
           bdd_eql(props[c.lhs.prop][i][c.lhs.value],
@@ -180,8 +183,9 @@ course::main_logic(int argc, char** argv)
   {
     auto evaluate_general_constraint = [&](const auto& item)
     {
-      task &= std::visit([&](auto&& rhs) -> bdd { return evaluate_constraint(properties, rhs); },
-                 item);
+      task &= std::visit([&](auto&& rhs) -> bdd
+                         { return evaluate_constraint(properties, rhs); },
+                         item);
     };
 
     std::for_each(
@@ -219,6 +223,8 @@ course::main_logic(int argc, char** argv)
 
   double satcount = bdd_satcount(task);
   std::cout << "Solution count: " << satcount << '\n';
+  std::cout
+    << "if solution number is greater than 10000 file will not be created\n";
   if (satcount != 0 && satcount <= 10000)
   {
     std::filesystem::path output_file(program_dir / "out.txt");
