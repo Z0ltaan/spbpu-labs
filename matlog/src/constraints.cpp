@@ -1,6 +1,5 @@
 #include "constraints.hpp"
-#include <ios>
-#include <istream>
+#include <iostream>
 #include <limits>
 
 static bool

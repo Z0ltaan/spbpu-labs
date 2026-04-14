@@ -11,7 +11,7 @@ file(GLOB_RECURSE imgui_files ${CMAKE_SOURCE_DIR}/imgui/*.cpp)
 add_executable(${PROJECT_NAME} ${source_files} ${imgui_files})
 
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_17)
-target_link_libraries(${PROJECT_NAME} PUBLIC OpenGL::GL glfw3)
+target_link_libraries(${PROJECT_NAME} PUBLIC OpenGL::GL PUBLIC glfw3)
 target_include_directories(
   ${PROJECT_NAME}
   PUBLIC ${CMAKE_SOURCE_DIR}/include

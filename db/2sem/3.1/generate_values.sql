@@ -1,0 +1,1 @@
+CALL generate_data();

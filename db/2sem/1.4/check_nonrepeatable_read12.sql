@@ -1,0 +1,2 @@
+SELECT num FROM cars WHERE id = 1;
+COMMIT;

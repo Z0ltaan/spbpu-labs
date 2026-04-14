@@ -7,7 +7,7 @@ file(GLOB_RECURSE source_files ${CMAKE_HOME_DIRECTORY}/src/*.cpp)
 add_executable(${PROJECT_NAME} ${source_files})
 
 target_link_libraries(${PROJECT_NAME}
-                      PUBLIC ${CMAKE_HOME_DIRECTORY}/src/buddy/libbdd.a)
+  PUBLIC ${CMAKE_HOME_DIRECTORY}/BuDDy/libbdd.a)
 
 target_include_directories(${PROJECT_NAME}
                            PUBLIC ${CMAKE_HOME_DIRECTORY}/include)

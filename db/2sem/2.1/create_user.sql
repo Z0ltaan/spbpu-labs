@@ -1,0 +1,3 @@
+CREATE USER test WITH password 'a';
+GRANT CONNECT ON DATABASE dblabs1 TO test;
+GRANT USAGE ON SCHEMA public TO test;

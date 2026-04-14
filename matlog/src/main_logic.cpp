@@ -13,6 +13,8 @@
 
 static constexpr int N = 9; // число объектов;
 static constexpr int M = 4; // число свойств
+static constexpr size_t nodenum = 1000000;
+static constexpr size_t cache_size = 10000;
 
 static const int LOG_N = std::ceil(std::log2(N));
 static const int N_VAR = N * M * LOG_N; // число булевых переменных
@@ -61,7 +63,7 @@ evaluate_constraint(const props_array& props, const course::constraint3& c)
 {
   bdd to_return = bddtrue;
   static const size_t N_SQRT = static_cast< size_t >(std::sqrt(N));
-  static const char * split_allowed = std::getenv("SPLIT");
+  static const char* split_allowed = std::getenv("SPLIT");
   const auto upper_bound = props.front().size();
   if (c.side == 'u')
   {
@@ -153,8 +155,6 @@ course::main_logic(int argc, char** argv)
   }
   props_array properties;
 
-  size_t nodenum = 1000000;
-  size_t cache_size = 10000;
   bdd_init(nodenum, cache_size);
   bdd_setvarnum(N_VAR);
 
@@ -223,8 +223,8 @@ course::main_logic(int argc, char** argv)
 
   double satcount = bdd_satcount(task);
   std::cout << "Solution count: " << satcount << '\n';
-  std::cout
-    << "if solution number is greater than 10000 file will not be created\n";
+  std::cout << "If solution number is greater than 10000 or equal to 0 file "
+               "will not be created\n";
   if (satcount != 0 && satcount <= 10000)
   {
     std::filesystem::path output_file(program_dir / "out.txt");
@@ -249,16 +249,17 @@ print()
     out << i << ": ";
     for (unsigned j = 0; j < M; j++)
     {
-      // J вычисляется как смещение i-й строки и j-го столбца
       unsigned J = (i * M + j) * LOG_N;
       unsigned num = 0;
+      unsigned power_of_2 = 1;
+
       for (unsigned k = 0; k < LOG_N; k++)
       {
-        // Извлекаем бит и сдвигаем его на позицию k
         if (var[J + k])
         {
-          num |= (1u << k);
+          num += power_of_2;
         }
+        power_of_2 *= 2;
       }
       out << num << " ";
     }
@@ -270,9 +271,6 @@ print()
 static void
 build(char* varset, unsigned total_bits)
 {
-  // Стек состояний: [текущий_индекс_бита, текущее_действие]
-  // действие 0: пробуем положить 0, действие 1: пробуем положить 1, действие 2:
-  // выход
   struct State
   {
     unsigned idx;
@@ -297,31 +295,10 @@ build(char* varset, unsigned total_bits)
 
     if (varset[i] >= 0)
     {
-      // Если бит фиксирован, просто записываем его и идем дальше
       if (curr.step == 0)
       {
         var[i] = varset[i];
-        curr.step = 1; // Помечаем, что ветка отработана
-        stack.push_back({ i + 1, 0 });
-      }
-      else
-      {
-        stack.pop_back();
-      }
-    }
-    else
-    {
-      // Если бит свободный (-1), перебираем 0 и 1
-      if (curr.step == 0)
-      {
-        var[i] = 0;
-        curr.step = 1;
-        stack.push_back({ i + 1, 0 });
-      }
-      else if (curr.step == 1)
-      {
-        var[i] = 1;
-        curr.step = 2;
+        curr.step = 1; // NOTE: done with branch
         stack.push_back({ i + 1, 0 });
       }
       else
