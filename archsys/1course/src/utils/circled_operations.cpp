@@ -1,4 +1,4 @@
-#include "utils/circled_operations.hpp"
+#include "circled_operations.hpp"
 
 void course::circle_increment(size_t &value, size_t lower_bound, size_t upper_bound)
 {

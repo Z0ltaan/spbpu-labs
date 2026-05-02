@@ -3,7 +3,7 @@
 
 #include <limits>
 #include <stdexcept>
-#include "priority.hpp"
+#include "../priority.hpp"
 
 namespace course
 {

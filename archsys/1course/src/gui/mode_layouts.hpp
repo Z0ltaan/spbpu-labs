@@ -1,7 +1,7 @@
 #ifndef MODE_LAYOUTS_HPP
 #define MODE_LAYOUTS_HPP
 
-#include "configuration.hpp"
+#include "../configuration.hpp"
 
 namespace course
 {

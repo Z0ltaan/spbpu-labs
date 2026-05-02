@@ -1,8 +1,7 @@
-#include "gui/mode_layouts.hpp"
+#include "mode_layouts.hpp"
 #include <imgui.h>
-#include "configuration.hpp"
-#include "disciplines.hpp"
-#include "producer.hpp"
+#include "../configuration.hpp"
+#include "../producer.hpp"
 
 void course::call_interactive_mode_layout(const course::ProgramState &state)
 {
