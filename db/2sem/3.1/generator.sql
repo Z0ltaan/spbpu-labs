@@ -1,7 +1,5 @@
 CREATE EXTENSION IF NOT EXISTS plpython3u;
 
-CREATE EXTENSION IF NOT EXISTS plpython3u;
-
 CREATE OR REPLACE PROCEDURE generate_data()
 AS $$
 import random
