@@ -5,73 +5,83 @@ AS $$
 import re
 import json
 
-# Регулярки: 
-# 1. Для строки с именем актера (Фамилия, Имя)
-name_re = re.compile(r'^([^\t]+),\s+([^\t]+)')
-# 2. Для строки с ролью (начинается с табуляции)
-role_re = re.compile(
-    r'^\t+(?P<title>.+?)\s+'          
-    r'\((?P<year>\d{4}|\?{4})\S*\)\s*' 
-    r'(?P<types>(?:\([^\)]+\)\s*)*)'   
-    r'(?:\{(?P<series>[^\}]+)\}\s*)?'  
-    r'(?:\((?P<as_char>as [^\)]+)\)\s*)?' 
-    r'(?:\[(?P<char>[^\]]+)\]\s*)?'    
-    r'(?:<(?P<credit>\d+)>)?'
+line_re = re.compile(r'^(?P<name>[^\t]+)\t+(?P<role_data>.+)')
+subsequent_role_re = re.compile(r'^\t+(?P<role_data>.+)')
+
+role_parser = re.compile(
+    r'^(?P<title>.+?)\s+'
+    r'\((?P<year>\d{4}|\?{4})\S*\)'
+    r'(?:\s+(?P<tags>(?:\((?:V|TV|VG|archive footage|uncredited|voice)\)\s*)+))?'
+    r'(?:\s+\{(?P<series>[^\}]+)\})?'
+    r'(?:\s+\(as\s+(?P<alias>[^\)]+)\))?'
+    r'(?:\s+\[(?P<character>[^\]]+)\])?'
+    r'(?:\s+<(?P<credit>\d+)>)?'
 )
 
-type_map = {
-    '(V)': 'typeVI', '(TV)': 'typeTV', '(VG)': 'typeVG', 
-    '(archive footage)': 'typeAF', '(uncredited)': 'typeUC', '(voice)': 'typeVO'
-}
+def parse_role_line(role_str):
+    m = role_parser.search(role_str.strip())
+    if not m:
+        return None
+    
+    res = {
+        "title": m.group('title').strip('" '),
+        "year": m.group('year').replace('????', '0000')
+    }
+    
+    tags = m.group('tags')
+    if tags:
+        if '(V)' in tags: res['type_video'] = True
+        if '(TV)' in tags: res['type_tv'] = True
+        if '(VG)' in tags: res['type_game'] = True
+        if '(uncredited)' in tags: res['uncredited'] = True
+        if '(voice)' in tags: res['voice'] = True
+        if '(archive footage)' in tags: res['archive'] = True
 
--- try:
+    # Дополнительные поля, если они есть
+    if m.group('series'):    res['series'] = m.group('series')
+    if m.group('alias'):     res['as'] = m.group('alias')
+    if m.group('character'): res['character'] = m.group('character')
+    if m.group('credit'):    res['credit_pos'] = int(m.group('credit'))
+    
+    return res
+
 with open(file_path, 'r', encoding='latin-1') as f:
-    current_actor = None
+    current_name = None
     roles = []
-    count = 0
+    
+    # Пропуск заголовка
+    for line in f:
+        if line.startswith('----'): break
+
+    plan = plpy.prepare("INSERT INTO actors (first_name, last_name, roles) VALUES ($1, $2, $3)", ["text", "text", "jsonb"])
 
     for line in f:
-        # Ищем имя актера
-        name_match = name_re.match(line)
+        if not line.strip() or line.startswith('----'): continue
+        
+        name_match = line_re.match(line)
         if name_match:
-            # Если уже был актер, сохраняем его перед началом нового
-            if current_actor and roles:
-                plan = plpy.prepare("INSERT INTO actors (FirstName, LastName, RolesName) VALUES ($1, $2, $3)", ["text", "text", "jsonb"])
-                plpy.execute(plan, [current_actor['first'], current_actor['last'], json.dumps({"roles": roles})])
-                count += 1
+            # Сохраняем предыдущего
+            if current_name and roles:
+                parts = current_name.split(', ', 1)
+                last = parts[0] if len(parts) > 0 else ""
+                first = parts[1] if len(parts) > 1 else ""
+                plpy.execute(plan, [first, last, json.dumps({"roles": roles})])
             
-            current_actor = {'last': name_match.group(1), 'first': name_match.group(2)}
+            current_name = name_match.group('name').strip()
             roles = []
-            continue
-
-        # Ищем роль для текущего актера
-        role_match = role_re.search(line)
-        if role_match and current_actor:
-            role = {
-                "title": role_match.group('title').strip('" '),
-                "year": role_match.group('year').replace('????', '0000')
-            }
+            role_info = parse_role_line(name_match.group('role_data'))
+            if role_info: roles.append(role_info)
             
-            # Маппинг типов (V, TV, VG...)
-            tags = role_match.group('types')
-            for tag, key in type_map.items():
-                if tag in tags: role[key] = "1"
-            
-            if role_match.group('series'): role['series name'] = role_match.group('series')
-            if role_match.group('char'): role['character name'] = role_match.group('char')
-            if role_match.group('credit'): role['credit'] = role_match.group('credit')
-            
-            roles.append(role)
+        else:
+            role_match = subsequent_role_re.match(line)
+            if role_match and current_name:
+                role_info = parse_role_line(role_match.group('role_data'))
+                if role_info: roles.append(role_info)
 
-    # Не забываем сохранить последнего актера
-    if current_actor and roles:
-        plan = plpy.prepare("INSERT INTO actors (FirstName, LastName, RolesName) VALUES ($1, $2, $3)", ["text", "text", "jsonb"])
-        plpy.execute(plan, [current_actor['first'], current_actor['last'], json.dumps({"roles": roles})])
-        count += 1
+    # Последний актер
+    if current_name and roles:
+        parts = current_name.split(', ', 1)
+        plpy.execute(plan, [parts[1] if len(parts)>1 else "", parts[0], json.dumps({"roles": roles})])
 
-    -- return {count}
-print(f"Imported actors: {count}")
--- except Exception as e:
---     return f"Ошибка: {str(e)}"
 $$ LANGUAGE plpython3u;
 

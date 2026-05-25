@@ -1,2 +1,0 @@
-EXPLAIN (ANALYZE, VERBOSE, COSTS, TIMING, FORMAT JSON) 
--- сюда ваш запрос

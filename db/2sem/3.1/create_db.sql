@@ -13,8 +13,3 @@ CREATE TABLE child_table (
     comment    TEXT,
     created_at TIMESTAMP
 );
-
-CREATE TABLE lookup (
-    id   INT,
-    name TEXT
-);

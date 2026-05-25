@@ -1,1 +1,1 @@
-call import_actors_from_file();
+call import_actors_from_file('/tmp/actors.list.txt');
