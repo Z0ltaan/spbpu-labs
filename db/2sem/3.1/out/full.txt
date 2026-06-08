@@ -1,34 +1,34 @@
                                                                   QUERY PLAN                                                                   
 -----------------------------------------------------------------------------------------------------------------------------------------------
- Gather  (cost=1000.00..1279140.66 rows=50000 width=104) (actual time=33774.196..33778.710 rows=0 loops=1)
+ Gather  (cost=1000.00..1279152.85 rows=50001 width=104) (actual time=40955.817..40962.168 rows=0 loops=1)
    Output: id, comment, created_at
    Workers Planned: 2
    Workers Launched: 2
-   Buffers: shared hit=14399 read=165272
-   ->  Parallel Seq Scan on public.child_table  (cost=0.00..1273140.66 rows=20833 width=104) (actual time=33762.679..33762.679 rows=0 loops=3)
+   Buffers: shared hit=16230 read=163445
+   ->  Parallel Seq Scan on public.child_table  (cost=0.00..1273152.75 rows=20834 width=104) (actual time=40943.459..40943.459 rows=0 loops=3)
          Output: id, comment, created_at
          Filter: (to_tsvector('english'::regconfig, child_table.comment) @@ '''mos'''::tsquery)
          Rows Removed by Filter: 3333333
-         Buffers: shared hit=14399 read=165272
-         Worker 0:  actual time=33757.290..33757.290 rows=0 loops=1
+         Buffers: shared hit=16230 read=163445
+         Worker 0:  actual time=40937.548..40937.549 rows=0 loops=1
            JIT:
              Functions: 4
              Options: Inlining true, Optimization true, Expressions true, Deforming true
-             Timing: Generation 0.227 ms, Inlining 38.301 ms, Optimization 17.118 ms, Emission 9.792 ms, Total 65.438 ms
-           Buffers: shared hit=4801 read=55128
-         Worker 1:  actual time=33756.817..33756.818 rows=0 loops=1
+             Timing: Generation 0.216 ms, Inlining 44.519 ms, Optimization 20.230 ms, Emission 11.071 ms, Total 76.036 ms
+           Buffers: shared hit=5393 read=54805
+         Worker 1:  actual time=40937.927..40937.928 rows=0 loops=1
            JIT:
              Functions: 4
              Options: Inlining true, Optimization true, Expressions true, Deforming true
-             Timing: Generation 0.308 ms, Inlining 37.992 ms, Optimization 17.147 ms, Emission 9.800 ms, Total 65.248 ms
-           Buffers: shared hit=4812 read=55008
+             Timing: Generation 0.257 ms, Inlining 43.203 ms, Optimization 20.022 ms, Emission 12.756 ms, Total 76.237 ms
+           Buffers: shared hit=5515 read=54167
  Planning:
-   Buffers: shared hit=94 read=15
- Planning Time: 4.846 ms
+   Buffers: shared hit=94 read=15 written=3
+ Planning Time: 5.654 ms
  JIT:
    Functions: 12
    Options: Inlining true, Optimization true, Expressions true, Deforming true
-   Timing: Generation 0.677 ms, Inlining 120.674 ms, Optimization 58.392 ms, Emission 30.887 ms, Total 210.629 ms
- Execution Time: 33787.362 ms
+   Timing: Generation 0.615 ms, Inlining 140.672 ms, Optimization 67.739 ms, Emission 36.944 ms, Total 245.969 ms
+ Execution Time: 40970.666 ms
 (30 rows)
 

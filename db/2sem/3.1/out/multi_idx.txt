@@ -1,19 +1,24 @@
-                                                                       QUERY PLAN                                                                       
---------------------------------------------------------------------------------------------------------------------------------------------------------
- Nested Loop  (cost=0.86..124755.97 rows=1 width=116) (actual time=45.949..45.950 rows=0 loops=1)
-   Buffers: shared hit=4 read=12387
-   ->  Index Scan using idx_child_main_id_created on child_table c  (cost=0.43..124747.53 rows=1 width=104) (actual time=45.948..45.948 rows=0 loops=1)
-         Index Cond: (created_at >= '2024-01-15 00:00:00'::timestamp without time zone)
-         Buffers: shared hit=4 read=12387
-   ->  Index Scan using main_table_pkey on main_table m  (cost=0.42..8.45 rows=1 width=20) (never executed)
-         Index Cond: ((id = c.main_id) AND (id > 10000))
+                                                                        QUERY PLAN                                                                         
+-----------------------------------------------------------------------------------------------------------------------------------------------------------
+ Gather  (cost=1201.52..37543.20 rows=1 width=116) (actual time=9.757..11.528 rows=0 loops=1)
+   Workers Planned: 2
+   Workers Launched: 2
+   Buffers: shared hit=29881 read=229 written=159
+   ->  Nested Loop  (cost=201.52..36543.10 rows=1 width=116) (actual time=6.786..6.788 rows=0 loops=3)
+         Buffers: shared hit=29881 read=229 written=159
+         ->  Parallel Bitmap Heap Scan on main_table m  (cost=201.08..8005.69 rows=3929 width=20) (actual time=0.402..3.719 rows=3333 loops=3)
+               Recheck Cond: ((id >= 10001) AND (id <= 20000))
+               Heap Blocks: exact=41
+               Buffers: shared hit=5 read=103 written=58
+               ->  Bitmap Index Scan on main_table_pkey  (cost=0.00..198.73 rows=9430 width=0) (actual time=0.879..0.880 rows=10000 loops=1)
+                     Index Cond: ((id >= 10001) AND (id <= 20000))
+                     Buffers: shared hit=5 read=28
+         ->  Index Scan using idx_child_main_id_created on child_table c  (cost=0.43..7.25 rows=1 width=104) (actual time=0.001..0.001 rows=0 loops=10000)
+               Index Cond: ((main_id = m.id) AND (created_at >= '2024-01-15 00:00:00'::timestamp without time zone))
+               Buffers: shared hit=29876 read=126 written=101
  Planning:
-   Buffers: shared hit=262 read=64
- Planning Time: 2.947 ms
- JIT:
-   Functions: 8
-   Options: Inlining false, Optimization false, Expressions true, Deforming true
-   Timing: Generation 0.240 ms, Inlining 0.000 ms, Optimization 0.000 ms, Emission 0.000 ms, Total 0.240 ms
- Execution Time: 55.861 ms
-(15 rows)
+   Buffers: shared hit=315 read=20
+ Planning Time: 2.371 ms
+ Execution Time: 11.566 ms
+(20 rows)
 

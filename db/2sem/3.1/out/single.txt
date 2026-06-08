@@ -1,16 +1,12 @@
-                                                                    QUERY PLAN                                                                     
----------------------------------------------------------------------------------------------------------------------------------------------------
- Index Scan using child_table_pkey on child_table  (cost=0.43..246978.38 rows=5049847 width=104) (actual time=3.250..616.946 rows=4999999 loops=1)
-   Index Cond: (id > 5000000)
+                                                                QUERY PLAN                                                                
+------------------------------------------------------------------------------------------------------------------------------------------
+ Index Scan using child_table_pkey on child_table  (cost=0.43..566.58 rows=10940 width=104) (actual time=0.339..2.298 rows=10001 loops=1)
+   Index Cond: ((id >= 5000000) AND (id <= 5010000))
    Filter: (created_at >= '2024-01-01 00:00:00'::timestamp without time zone)
-   Buffers: shared hit=4 read=103357 written=2
+   Buffers: shared hit=3 read=211
  Planning:
-   Buffers: shared hit=103
- Planning Time: 0.232 ms
- JIT:
-   Functions: 6
-   Options: Inlining false, Optimization false, Expressions true, Deforming true
-   Timing: Generation 0.170 ms, Inlining 0.000 ms, Optimization 0.181 ms, Emission 2.627 ms, Total 2.978 ms
- Execution Time: 718.756 ms
-(12 rows)
+   Buffers: shared hit=106
+ Planning Time: 0.666 ms
+ Execution Time: 2.521 ms
+(8 rows)
 

@@ -1,34 +1,34 @@
                                                                    QUERY PLAN                                                                   
 ------------------------------------------------------------------------------------------------------------------------------------------------
- Gather  (cost=1328.69..107698.39 rows=41335 width=104) (actual time=13.787..16.143 rows=0 loops=1)
+ Gather  (cost=1332.18..108883.61 rows=42001 width=104) (actual time=12.925..15.661 rows=0 loops=1)
    Output: id, comment, created_at
    Workers Planned: 2
    Workers Launched: 2
-   Buffers: shared hit=1 read=2
-   ->  Parallel Bitmap Heap Scan on public.child_table  (cost=328.69..102564.89 rows=17223 width=104) (actual time=0.098..0.098 rows=0 loops=3)
+   Buffers: shared hit=3
+   ->  Parallel Bitmap Heap Scan on public.child_table  (cost=332.18..103683.51 rows=17500 width=104) (actual time=0.088..0.089 rows=0 loops=3)
          Output: id, comment, created_at
          Recheck Cond: (to_tsvector('english'::regconfig, child_table.comment) @@ '''mos'''::tsquery)
-         Buffers: shared hit=1 read=2
-         Worker 0:  actual time=0.017..0.017 rows=0 loops=1
+         Buffers: shared hit=3
+         Worker 0:  actual time=0.012..0.013 rows=0 loops=1
            JIT:
              Functions: 4
              Options: Inlining false, Optimization false, Expressions true, Deforming true
-             Timing: Generation 0.190 ms, Inlining 0.000 ms, Optimization 0.000 ms, Emission 0.000 ms, Total 0.190 ms
-         Worker 1:  actual time=0.011..0.011 rows=0 loops=1
+             Timing: Generation 0.186 ms, Inlining 0.000 ms, Optimization 0.000 ms, Emission 0.000 ms, Total 0.186 ms
+         Worker 1:  actual time=0.012..0.013 rows=0 loops=1
            JIT:
              Functions: 4
              Options: Inlining false, Optimization false, Expressions true, Deforming true
-             Timing: Generation 0.204 ms, Inlining 0.000 ms, Optimization 0.000 ms, Emission 0.000 ms, Total 0.204 ms
-         ->  Bitmap Index Scan on idx_child_fts  (cost=0.00..318.35 rows=41335 width=0) (actual time=0.023..0.023 rows=0 loops=1)
+             Timing: Generation 0.197 ms, Inlining 0.000 ms, Optimization 0.000 ms, Emission 0.000 ms, Total 0.197 ms
+         ->  Bitmap Index Scan on idx_child_fts  (cost=0.00..321.68 rows=42001 width=0) (actual time=0.020..0.020 rows=0 loops=1)
                Index Cond: (to_tsvector('english'::regconfig, child_table.comment) @@ '''mos'''::tsquery)
-               Buffers: shared hit=1 read=2
+               Buffers: shared hit=3
  Planning:
-   Buffers: shared hit=155 read=21 dirtied=1
- Planning Time: 2.681 ms
+   Buffers: shared hit=161 read=17 written=17
+ Planning Time: 2.972 ms
  JIT:
    Functions: 12
    Options: Inlining false, Optimization false, Expressions true, Deforming true
-   Timing: Generation 0.544 ms, Inlining 0.000 ms, Optimization 0.000 ms, Emission 0.000 ms, Total 0.544 ms
- Execution Time: 26.670 ms
+   Timing: Generation 0.529 ms, Inlining 0.000 ms, Optimization 0.000 ms, Emission 0.000 ms, Total 0.529 ms
+ Execution Time: 24.820 ms
 (30 rows)
 

@@ -20,9 +20,6 @@ Datum get_safe_password_c(PG_FUNCTION_ARGS) {
   int current_pos = 50;
 
   for (int i = 0; i < len; i += 3) {
-    if (i + 2 >= len)
-      break;
-
     char direction = input[i];
     char val_str[3] = {input[i + 1], input[i + 2], '\0'};
     int value = atoi(val_str);
