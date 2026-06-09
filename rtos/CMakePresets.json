@@ -1,0 +1,17 @@
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "dos-16bit",
+      "displayName": "DOS 16-bit",
+      "description": "Cross-compilation for 16-bit DOS using Open Watcom",
+      "generator": "Watcom WMake",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "CMAKE_SYSTEM_NAME": "DOS",
+        "CMAKE_SYSTEM_PROCESSOR": "I86",
+        "CMAKE_C_FLAGS": "-za99"
+      }
+    }
+  ]
+}
