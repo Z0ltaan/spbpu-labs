@@ -10,7 +10,7 @@ TTaskQueue readyQueues[MAX_PRIORITY_NUMBER];
 jmp_buf schedulerContext;
 TTask currentTask;
 
-// TODO: такое себе как будто бы (на каждый раз)
+// NOTE: такое себе как будто бы (на каждый раз)
 static int8_t
 _GetHighestPriority()
 {
@@ -34,7 +34,7 @@ _Schedule()
 
   if (highestPriority < 0)
   {
-    longjmp(schedulerContext, JUMP_TO_SHUTDOWN);
+    longjmp(schedulerContext, SHUTDOWN);
   }
 
   TTaskQueueNode* node = TaskQueuePop(&readyQueues[highestPriority]);
@@ -51,10 +51,10 @@ _Schedule()
     taskTable[taskID].state = TASK_STATE_SUSPENDED;
 
     currentTask = INVALID_TASK;
-    longjmp(schedulerContext, JUMP_TO_SCHEDULER);
+    longjmp(schedulerContext, SCHEDULE);
   }
   else
   {
-    longjmp(taskTable[taskID].context, JUMP_TO_SCHEDULER);
+    longjmp(taskTable[taskID].context, SCHEDULE);
   }
 }

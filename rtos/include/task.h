@@ -7,6 +7,8 @@
 #define DeclareTask(TaskID) void TaskBody_##TaskID();
 #define TASK(TaskID) void TaskBody_##TaskID()
 
+// NOTE: priority will be changed to period some time later (not very
+// significant)
 int8_t
 RegisterTask(TTask taskID, void (*taskFunc)(void), int8_t priority);
 

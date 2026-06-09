@@ -19,7 +19,7 @@ StartOS(TTask task)
                   &taskTable[task].readyNode);
   }
 
-  if (setjmp(schedulerContext) == JUMP_TO_SHUTDOWN)
+  if (setjmp(schedulerContext) == SHUTDOWN)
   {
     return;
   }
@@ -33,5 +33,5 @@ StartOS(TTask task)
 void
 ShutdownOS()
 {
-  longjmp(schedulerContext, JUMP_TO_SHUTDOWN);
+  longjmp(schedulerContext, SHUTDOWN);
 }

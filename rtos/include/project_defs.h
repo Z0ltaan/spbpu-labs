@@ -14,8 +14,8 @@
 #define INVALID_TASK (-1)
 #define INVALID_RESOURCE (-1)
 
-#define JUMP_TO_SHUTDOWN 2
-#define JUMP_TO_SCHEDULER 1
+#define SHUTDOWN 2
+#define SCHEDULE 1
 
 typedef int8_t TTask;
 typedef int8_t TResource;

@@ -66,7 +66,7 @@ TerminateTask()
   taskTable[currentTask].state = TASK_STATE_SUSPENDED;
   currentTask = INVALID_TASK;
 
-  longjmp(schedulerContext, JUMP_TO_SCHEDULER);
+  longjmp(schedulerContext, SCHEDULE);
 }
 
 void
@@ -78,6 +78,6 @@ YeildTask()
     TaskQueuePush(&readyQueues[taskTable[currentTask].priority],
                   &taskTable[currentTask].readyNode);
     currentTask = INVALID_TASK;
-    longjmp(schedulerContext, JUMP_TO_SCHEDULER);
+    longjmp(schedulerContext, SCHEDULE);
   }
 }
