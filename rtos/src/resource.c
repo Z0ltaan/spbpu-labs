@@ -1,4 +1,5 @@
 #include "resource.h"
+#include <semaphore.h>
 
 // TODO:
 void

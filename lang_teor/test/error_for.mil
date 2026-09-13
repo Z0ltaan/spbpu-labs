@@ -1,0 +1,22 @@
+BEGIN
+  for i := 1 to 10 do
+    write(i)
+  od;
+
+  for i := 1 to step 2 do
+    write(i)
+  od;
+
+  for i 1 to 10 step 1 do
+    write(i)
+  od;
+
+  for i := 1 to 10 step 1
+    write(i)
+  od;
+
+  for i := 1 to 10 step 1 do
+    write(i)
+  
+  write(999)
+END

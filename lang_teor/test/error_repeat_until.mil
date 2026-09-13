@@ -1,0 +1,9 @@
+BEGIN
+  repeat
+    x := x + 1
+  od;
+
+  repeat
+    write(42)
+  until;
+END

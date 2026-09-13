@@ -2,6 +2,8 @@ CMake*/
 !.gitignore
 build/
 *.zip
+external/
+vcpkg_installed/
 cmake-build-debug/
 compile_commands.json
 imgui.ini
