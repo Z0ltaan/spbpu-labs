@@ -1,5 +1,9 @@
 {
-  "name": "glbox",
+  "name": "model1",
   "version-string": "0.1.0",
-  "dependencies": ["opengl", "glm", "glew", "glfw3", "assimp"]
+  "dependencies": [
+    "raylib-cpp",
+    "raylib",
+    "glfw3"
+  ]
 }
