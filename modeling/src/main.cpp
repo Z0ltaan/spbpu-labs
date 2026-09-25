@@ -7,11 +7,15 @@
 #include <cstdlib>
 #include <functional>
 #include <iostream>
+#include <memory>
+#include <raylib-cpp/Keyboard.hpp>
+#include <raylib-cpp/Vector3.hpp>
 #include <raylib.h>
 #include <raymath.h>
 #include <stdexcept>
 #include <string_view>
 #include <utility>
+#include "raylib-cpp.hpp"
 
 namespace sandbox
 {
@@ -90,8 +94,15 @@ namespace sandbox::util
   };
 }
 
-template< class EventType >
-struct event_line
+struct abstract_scene_event
+{
+  virtual void execute_idempotent() = 0;
+  virtual void execute() = 0;
+  virtual bool completed() const noexcept = 0;
+  virtual ~abstract_scene_event() = default;
+};
+
+class event_line
 {
 public:
   event_line() : m_pos(0), m_events() {}
@@ -106,7 +117,10 @@ public:
     return true;
   }
 
-  void add_event(const EventType& e) { m_events.push_back(e); }
+  void add_event(std::unique_ptr< abstract_scene_event > e)
+  {
+    m_events.push_back(std::move(e));
+  }
 
   bool execute_current()
   {
@@ -116,11 +130,11 @@ public:
     }
 
     auto& e = m_events[m_pos];
-    if (e.completed())
+    if (e->completed())
     {
       return false;
     }
-    e.execute();
+    e->execute();
     return true;
   }
 
@@ -132,17 +146,19 @@ public:
 
 private:
   size_t m_pos;
-  std::vector< EventType > m_events;
+  std::vector< std::unique_ptr< abstract_scene_event > > m_events;
 };
 
-class scene_event
+class scene_event: public abstract_scene_event
 {
 public:
   template< class Callable >
   explicit scene_event(Callable f) : m_completed(false), m_body(std::move(f))
   {}
 
-  void execute_idempotent()
+  ~scene_event() = default;
+
+  void execute_idempotent() override
   {
     if (completed())
     {
@@ -151,25 +167,111 @@ public:
     execute();
   }
 
-  void execute() { m_body(); }
+  void execute() override { m_body(); }
 
-  bool completed() const noexcept { return m_completed; }
+  bool completed() const noexcept override { return m_completed; }
 
 private:
   bool m_completed;
   std::function< void() > m_body;
 };
 
-#include "raylib-cpp.hpp"
+class scene_config
+{
+public:
+  using config_internal = struct
+  {
+    float cube_size;
+    float sphere_radius;
+    float small_cylinder_radius;
+    float large_cylinder_radius;
+    float small_cylinder_height;
+    float large_cylinder_height;
+    float angle;
+    float camera_fov;
+    float cylinder_shift;
+    raylib::Vector3 sphere_pos;
+    raylib::Vector3 small_cylinder_pos;
+    raylib::Vector3 cube_pos;
+    raylib::Vector3 large_cylinder_pos;
+    raylib::Vector3 camera_pos;
+    raylib::Vector3 camera_focus_point;
+    raylib::Vector3 camera_up_direction;
+    event_line events;
+  };
 
-float cubeSize = 2.0f;
-float sphereRadius = cubeSize / 2.0f;
-raylib::Vector3 smallCylinderPos(3.0f, 2.6f, 0.0f);
-float angle = 0.0f;
+  // NOTE: why protected
+protected:
+  scene_config() = default;
+
+public:
+  static std::shared_ptr< config_internal > get_instance()
+  {
+    if (!scene_config::instance_)
+    {
+      scene_config::instance_ = std::make_shared< config_internal >();
+    }
+    return scene_config::instance_;
+  }
+
+private:
+  static inline std::shared_ptr< config_internal > instance_;
+};
+
+void
+handle_input()
+{
+  auto config = scene_config::get_instance();
+  if (raylib::Keyboard::IsKeyReleased(KEY_ENTER))
+  {
+    config->events.execute_current();
+    config->events.next();
+  }
+}
 
 int
 main()
 {
+  auto config = scene_config::get_instance();
+
+  config->cube_size = 2.0f;
+  config->sphere_radius = config->cube_size / 2.0f;
+  config->small_cylinder_radius = 0.6f;
+  config->large_cylinder_radius = 1.5f;
+  config->small_cylinder_height = 1.2f;
+  config->large_cylinder_height = 2.0f;
+  config->cylinder_shift = 1.5f;
+  config->angle = 0.0f;
+  config->small_cylinder_pos = Vector3{ 3.0f, 2.6f, 0.0f };
+  config->large_cylinder_pos = Vector3{ 3.0f, 1.0f, 0.0f };
+  config->cube_pos = Vector3{ -4.0f, 1.0f, 0.0f };
+  config->sphere_pos = config->cube_pos;
+  config->camera_pos = Vector3{ 0.0f, 6.0f, 12.0f };
+  config->camera_focus_point = Vector3{ 0.0f, 1.0f, 0.0f };
+  config->camera_up_direction = Vector3{ 0.0f, 1.0f, 0.0f };
+  config->camera_fov = 45.0f;
+
+  config->events.add_event(std::make_unique< scene_event >(
+    []()
+    {
+      auto config = scene_config::get_instance();
+      config->sphere_radius = config->sphere_radius * 2.5f;
+    }));
+
+  config->events.add_event(std::make_unique< scene_event >(
+    []()
+    {
+      auto config = scene_config::get_instance();
+      config->small_cylinder_pos.x += config->cylinder_shift;
+    }));
+
+  config->events.add_event(std::make_unique< scene_event >(
+    []()
+    {
+      auto config = scene_config::get_instance();
+      config->angle = 45.0f;
+    }));
+
   // Инициализация окна
   const int screenWidth = 1000;
   const int screenHeight = 600;
@@ -177,11 +279,11 @@ main()
 
   // Настройка 3D-камеры
   raylib::Camera3D camera(
-    raylib::Vector3(0.0f, 6.0f, 12.0f), // Позиция камеры
-    raylib::Vector3(0.0f, 1.0f, 0.0f),  // Точка, на которую смотрит камера
-    raylib::Vector3(0.0f, 1.0f, 0.0f),  // Направление "верх" для камеры
-    45.0f,                              // Угол обзора (FOV)
-    CAMERA_PERSPECTIVE                  // Тип проекции
+    config->camera_pos,          // Позиция камеры
+    config->camera_focus_point,  // Точка, на которую смотрит камера
+    config->camera_up_direction, // Направление "верх" для камеры
+    config->camera_fov,          // Угол обзора (FOV)
+    CAMERA_PERSPECTIVE           // Тип проекции
   );
 
   window.SetTargetFPS(60);
@@ -189,6 +291,7 @@ main()
   // camera.Update(CAMERA_ORBITAL);
   while (!window.ShouldClose())
   {
+    handle_input();
     // Обновление камеры (управление мышью/клавиатурой для осмотра сцены)
     camera.Update(CAMERA_ORBITAL);
 
@@ -204,29 +307,20 @@ main()
     // ЗАДАНИЕ 1 и 2: Каркасный куб и масштабированная каркасная сфера
     // Сместим эту группу влево (X = -4.0f)
     // =================================================================
-    raylib::Vector3 cubePos(-4.0f, 1.0f, 0.0f);
 
     // 1. Рисуем каркасный куб
-    cubePos.DrawCubeWires(cubeSize, cubeSize, cubeSize, BLUE);
+    config->cube_pos.DrawCubeWires(
+      config->cube_size, config->cube_size, config->cube_size, BLUE);
 
     // 2. Изначально вписанная сфера имела бы радиус = cubeSize / 2 = 1.0f
     // Масштабируем её с коэффициентом 2.5 -> новый радиус = 1.0f * 2.5f = 2.5f
-    cubePos.DrawSphereWires(sphereRadius, 16, 16, RED);
+    config->sphere_pos.DrawSphereWires(config->sphere_radius, 16, 16, RED);
 
     // =================================================================
     // ЗАДАНИЕ 3 и 4: Большой и малый цилиндры
     // Сместим эту группу вправо (X = 3.0f)
     // =================================================================
 
-    // Параметры большого цилиндра
-    raylib::Vector3 largeCylinderPos(
-      3.0f, 1.0f, 0.0f); // Центр по Y = 1.0f (при высоте 2.0f он стоит на полу)
-    float largeRadius = 1.5f;
-    float largeHeight = 2.0f;
-
-    // Параметры малого цилиндра
-    float smallRadius = 0.6f;
-    float smallHeight = 1.2f;
     // Начальная позиция малого цилиндра (прямо поверх большого):
     // Y = Y_большого + (Высота_большого / 2) + (Высота_малого / 2) = 1.0 + 1.0
     // + 0.6 = 2.6f
@@ -234,51 +328,33 @@ main()
     // 4. Модификации цилиндров:
     // А) Сдвигаем малый цилиндр по оси X (например, на +1.5 единицы вправо
     // относительно общей позиции)
-    smallCylinderPos.x += 1.5f;
 
     rlPushMatrix();
-    rlTranslatef(largeCylinderPos.x, largeCylinderPos.y, largeCylinderPos.z);
+    rlTranslatef(config->large_cylinder_pos.x,
+                 config->large_cylinder_pos.y,
+                 config->large_cylinder_pos.z);
 
-    // Наклоняем цилиндр по оси X, чтобы он лёг набок,
-    // тогда поворот вокруг Y (или Z) станет визуально заметен!
-    rlRotatef(angle, 1.0f, 0.0f, 0.0f);
-    // rlRotatef(45.0f, 0.0f, 1.0f, 0.0f);
+    rlRotatef(config->angle, 0.0f, 1.0f, 0.0f);
 
-    DrawCylinderWires(
-      ::Vector3{ 0, 0, 0 }, largeRadius, largeRadius, largeHeight, 12, LIME);
+    DrawCylinderWires(::Vector3{ 0, 0, 0 },
+                      config->large_cylinder_radius,
+                      config->large_cylinder_radius,
+                      config->large_cylinder_height,
+                      12,
+                      LIME);
     rlPopMatrix();
     // Рисуем сдвинутый малый цилиндр
-    DrawCylinderWires(
-      smallCylinderPos, smallRadius, smallRadius, smallHeight, 12, ORANGE);
+    DrawCylinderWires(config->small_cylinder_pos,
+                      config->small_cylinder_radius,
+                      config->small_cylinder_radius,
+                      config->small_cylinder_height,
+                      12,
+                      ORANGE);
 
     camera.EndMode();
-
-    // // Вывод подсказок на экран
-    // DrawText("Управление: Зажмите ЛКМ и двигайте мышь для вращения камеры",
-    //          10,
-    //          10,
-    //          20,
-    //          DARKGRAY);
-    // DrawText("Слева: Куб (синий) и масштабированная сфера (красная, k=2.5)",
-    //          10,
-    //          40,
-    //          18,
-    //          BLUE);
-    // DrawText("Справа: Большой цилиндр (зеленый, повернут на 45 град) и малый
-    // "
-    //          "(оранжевый, сдвинут по X)",
-    //          10,
-    //          65,
-    //          18,
-    //          DARKGREEN);
 
     window.EndDrawing();
   }
 
   return 0;
 }
-
-// int
-// main(int argc, char** argv)
-// {
-// }
