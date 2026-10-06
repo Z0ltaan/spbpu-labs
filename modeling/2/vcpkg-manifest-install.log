@@ -9,6 +9,7 @@ The following packages are already installed:
   * mmx:x64-linux@2025-03-19
   * nanosvg:x64-linux@2023-12-29
   * qoi:x64-linux@2025-05-09
+    raygui:x64-linux@4.0
     raylib[core,audio]:x64-linux@5.5#1
     raylib-cpp:x64-linux@5.5.1
   * stb:x64-linux@2024-07-29#1
@@ -24,6 +25,11 @@ glfw3 provides pkg-config modules:
 
   # A multi-platform library for OpenGL, window and input
   glfw3
+
+raygui is header-only and can be used from CMake via:
+
+  find_path(RAYGUI_INCLUDE_DIRS "raygui.h")
+  target_include_directories(main PRIVATE ${RAYGUI_INCLUDE_DIRS})
 
 raylib provides CMake targets:
 
@@ -41,4 +47,4 @@ raylib-cpp is header-only and can be used from CMake via:
   find_path(RAYLIB_CPP_INCLUDE_DIRS "raylib-cpp.hpp")
   target_include_directories(main PRIVATE ${RAYLIB_CPP_INCLUDE_DIRS})
 
-All requested installations completed successfully in: 66.5 us
+All requested installations completed successfully in: 65.8 us

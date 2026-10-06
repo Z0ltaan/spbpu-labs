@@ -1,0 +1,10 @@
+{
+  "name": "model2",
+  "version-string": "0.1.0",
+  "dependencies": [
+    "raylib-cpp",
+    "raylib",
+    "glfw3",
+    "raygui"
+  ]
+}
